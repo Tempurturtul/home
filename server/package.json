@@ -1,0 +1,26 @@
+{
+  "name": "home-server",
+  "version": "1.0.0",
+  "description": "Server for Matthew Feidt's home on the web.",
+  "author": "Tempurturtul <tempurturtul@gmail.com>",
+  "private": true,
+  "scripts": {
+    "start": "node server.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "eslint --ext .js ./"
+  },
+  "engines": {
+    "node": ">= 6.0.0",
+    "npm": ">= 3.0.0"
+  },
+  "dependencies": {
+    "body-parser": "^1.17.2",
+    "express": "^4.15.4",
+    "pg-promise": "^6.5.0"
+  },
+  "devDependencies": {
+    "eslint": "^4.5.0",
+    "eslint-config-airbnb-base": "^11.3.1",
+    "eslint-plugin-import": "^2.7.0"
+  }
+}
