@@ -1,3 +1,3 @@
 # Home
 
-Matthew Feidt's home on the web.
+My home on the web.

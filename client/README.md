@@ -1,6 +1,6 @@
 # Home Client
 
-Client for Matthew Feidt's home on the web.
+Client for my home on the web.
 
 ## Build Setup
 
