@@ -1,6 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-// const apiRouter = require('./routes/api');
+const apiRouter = require('./routes/api');
 
 const app = express();
 
@@ -15,7 +15,7 @@ app.use(bodyParser.json());
 app.use(express.static('public'));
 
 // Routes.
-// app.use('/api/v1', apiRouter);
+app.use('/api/v1', apiRouter);
 
 // Start the server.
 app.listen(app.get('port'), () => {

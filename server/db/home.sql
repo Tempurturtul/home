@@ -1,0 +1,14 @@
+DROP DATABASE IF EXISTS home;
+CREATE DATABASE home;
+
+\c home;
+
+CREATE TABLE blogPosts (
+  id SERIAL PRIMARY KEY,
+  title VARCHAR NOT NULL,
+  author VARCHAR NOT NULL,
+  created TIMESTAMP NOT NULL,
+  modified TIMESTAMP,
+  tags VARCHAR[],
+  body VARCHAR
+);
