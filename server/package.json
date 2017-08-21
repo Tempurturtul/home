@@ -5,9 +5,9 @@
   "author": "Tempurturtul <tempurturtul@gmail.com>",
   "private": true,
   "scripts": {
-    "start": "node server.js",
+    "start": "nodemon server.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "lint": "eslint --ext .js ./"
+    "lint": "eslint --ext .js ./; exit 0"
   },
   "engines": {
     "node": ">= 6.0.0",
@@ -21,6 +21,7 @@
   "devDependencies": {
     "eslint": "^4.5.0",
     "eslint-config-airbnb-base": "^11.3.1",
-    "eslint-plugin-import": "^2.7.0"
+    "eslint-plugin-import": "^2.7.0",
+    "nodemon": "^1.11.0"
   }
 }
