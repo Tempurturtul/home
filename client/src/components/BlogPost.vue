@@ -1,7 +1,7 @@
 <template>
   <div class="blog-post">
     <h1>~/blog/{{id}}$ print-post</h1>
-    <div v-html="post.body"></div>
+    <div v-if="post" v-html="post.body"></div>
   </div>
 </template>
 
