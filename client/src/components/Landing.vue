@@ -12,13 +12,8 @@
 export default {
   name: 'landing',
   data() {
-    const messages = [
-      'Welcome home.',
-      'It\'s warmer with you here.',
-    ];
-    const randomIndex = Math.floor(Math.random() * messages.length);
     return {
-      msg: messages[randomIndex],
+      msg: 'Welcome home.',
     };
   },
 };

@@ -1,9 +1,9 @@
 <template>
   <div class="blog">
-    <h1>~/blog$ ls -l posts/ | format-post-info"</h1>
+    <h1>~/blog$ ls -l posts/ | format-post-info</h1>
     <ul>
       <li v-for="post in posts">
-        <router-link :to="{path: '/blog/' + post.id}">{{post.created}} {{post.author}} {{post.id}}</router-link>
+        <router-link :to="{path: '/blog/' + toLowerDashSpaces(post.title)}">{{post.created}} {{toLowerDashSpaces(post.author)}} {{toLowerDashSpaces(post.title)}}</router-link>
       </li>
     </ul>
   </div>
@@ -15,10 +15,9 @@ export default {
   data() {
     const posts = [
       {
-        id: 'reviewing-fend',
         title: 'Reviewing FEND',
         subtitle: 'Udacity\'s Front-End Web Developer Nanodegree',
-        author: 'matthew-feidt',
+        author: 'Matthew Feidt',
         created: '2016-07-24',
         modified: '',
         tags: [
@@ -28,10 +27,9 @@ export default {
         body: '<p>This review was originally posted on Reddit\'s /r/learnprogramming and /r/webdev subreddits. ...</p>',
       },
       {
-        id: 'hello-world',
         title: 'Hello World',
         subtitle: '',
-        author: 'matthew-feidt',
+        author: 'Matthew Feidt',
         created: '2016-07-19',
         modified: '2017-05-07',
         tags: [
@@ -44,6 +42,11 @@ export default {
     return {
       posts,
     };
+  },
+  methods: {
+    toLowerDashSpaces(str) {
+      return str.toLowerCase().split(' ').join('-');
+    },
   },
 };
 </script>
