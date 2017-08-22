@@ -6,7 +6,7 @@
   "private": true,
   "scripts": {
     "start": "nodemon server.js",
-    "test": "eslint --ext .js ./ && tape tests/**/*.js | faucet"
+    "test": "eslint --ext .js ./"
   },
   "engines": {
     "node": ">= 6.0.0",
@@ -21,8 +21,6 @@
     "eslint": "^4.5.0",
     "eslint-config-airbnb-base": "^11.3.1",
     "eslint-plugin-import": "^2.7.0",
-    "faucet": "0.0.1",
-    "nodemon": "^1.11.0",
-    "tape": "^4.8.0"
+    "nodemon": "^1.11.0"
   }
 }
