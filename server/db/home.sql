@@ -12,3 +12,9 @@ CREATE TABLE blogPosts (
   tags VARCHAR[],
   body VARCHAR
 );
+
+CREATE TABLE users (
+  name VARCHAR PRIMARY KEY,
+  password VARCHAR NOT NULL,
+  admin BOOLEAN
+);

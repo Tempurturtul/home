@@ -1,6 +1,7 @@
 // Results are JSend-compliant JSON. (https://labs.omniti.com/labs/jsend)
 
 const pgp = require('pg-promise')();
+const jwt = require('jsonwebtoken');
 const config = require('../config');
 
 const db = pgp(config.database);
@@ -12,8 +13,68 @@ const status = {
 };
 
 module.exports = {
+  authenticate(req, res) {
+    const { name, password } = req.body;
+
+    if (!name || !password) {
+      const data = {};
+
+      if (!name) {
+        data.name = 'A name is required.';
+      }
+      if (!password) {
+        data.password = 'A password is required.';
+      }
+
+      res.json({
+        status: status.FAIL,
+        data,
+      });
+    } else {
+      db.oneOrNone('SELECT * FROM users WHERE name=$1', [name])
+        .then((data) => {
+          if (!data) {
+            res.json({
+              status: status.FAIL,
+              data: {
+                name: 'No user with that name exists.',
+              },
+            });
+          } else {
+            const user = data;
+
+            // Check password.
+            if (user.password !== password) {
+              res.json({
+                status: status.FAIL,
+                data: {
+                  password: 'Wrong password.',
+                },
+              });
+            } else {
+              // Create a token.
+              const token = jwt.sign(user, config.secret, {
+                expiresIn: '10m',  // Expires in 10 minutes.
+              });
+
+              res.json({
+                status: status.SUCCESS,
+                data: token,
+              });
+            }
+          }
+        })
+        .catch((err) => {
+          res.json({
+            status: status.ERROR,
+            message: 'Error logging in.',
+            data: err,
+          });
+        });
+    }
+  },
   getBlogPosts(req, res) {
-    db.any('select * from blogPosts ORDER BY created')
+    db.any('SELECT * FROM blogPosts ORDER BY created')
       .then((data) => {
         res.json({
           status: status.SUCCESS,
@@ -39,7 +100,7 @@ module.exports = {
         },
       });
     } else {
-      db.one('select * from blogPosts where id=$1', [id])
+      db.one('SELECT * FROM blogPosts WHERE id=$1', [id])
         .then((data) => {
           res.json({
             status: status.SUCCESS,
