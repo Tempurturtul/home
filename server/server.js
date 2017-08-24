@@ -11,9 +11,6 @@ app.set('port', process.env.PORT || 3000);
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-// Static files.
-app.use(express.static('public'));
-
 // Routes.
 app.use('/api/v1', apiRouter);
 
