@@ -16,5 +16,5 @@ app.use('/api/v1', apiRouter);
 
 // Start the server.
 app.listen(app.get('port'), () => {
-  console.log(`Listening on port ${app.get('port')}.`);
+	console.log(`Listening on port ${app.get('port')}.`);
 });

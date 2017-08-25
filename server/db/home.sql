@@ -4,17 +4,17 @@ CREATE DATABASE home;
 \c home;
 
 CREATE TABLE blogPosts (
-  id SERIAL PRIMARY KEY,
-  title VARCHAR NOT NULL,
-  author VARCHAR NOT NULL,
-  created TIMESTAMP NOT NULL,
-  modified TIMESTAMP,
-  tags VARCHAR[],
-  body VARCHAR
+	id SERIAL PRIMARY KEY,
+	title VARCHAR NOT NULL,
+	author VARCHAR NOT NULL,
+	created TIMESTAMP NOT NULL,
+	modified TIMESTAMP,
+	tags VARCHAR[],
+	body VARCHAR
 );
 
 CREATE TABLE users (
-  name VARCHAR PRIMARY KEY,
-  password VARCHAR NOT NULL,
-  admin BOOLEAN
+	name VARCHAR PRIMARY KEY,
+	password VARCHAR NOT NULL,
+	admin BOOLEAN
 );

@@ -7,9 +7,9 @@ const db = require('../db');
 
 // JSend status messages.
 const status = {
-  SUCCESS: 'success',
-  FAIL: 'fail',
-  ERROR: 'error',
+	SUCCESS: 'success',
+	FAIL: 'fail',
+	ERROR: 'error',
 };
 
 // Unprotected routes.
@@ -19,35 +19,35 @@ router.get('/blog-posts/:id', db.getBlogPostById);
 
 // Route middleware to verify tokens.
 router.use((req, res, next) => {
-  // Check for a token.
-  const token = req.body.token || req.query.token || req.headers['x-access-token'];
+	// Check for a token.
+	const token = req.body.token || req.query.token || req.headers['x-access-token'];
 
-  if (token) {
-    // Decode the token.
-    jwt.verify(token, config.secret, (err, decoded) => {
-      if (err) {
-        // Invalid or expired token. (403 Forbidden)
-        res.status(403).json({
-          status: status.FAIL,
-          data: {
-            token: 'Your access token is invalid or expired.',
-          },
-        });
-      } else {
-        // Pass the decoded payload along for use in subsequent routes.
-        req.decoded = decoded;
-        next();
-      }
-    });
-  } else {
-    // No token. (403 Forbidden)
-    res.status(403).json({
-      status: status.FAIL,
-      data: {
-        token: 'An access token is required.',
-      },
-    });
-  }
+	if (token) {
+		// Decode the token.
+		jwt.verify(token, config.secret, (err, decoded) => {
+			if (err) {
+				// Invalid or expired token. (403 Forbidden)
+				res.status(403).json({
+					status: status.FAIL,
+					data: {
+						token: 'Your access token is invalid or expired.',
+					},
+				});
+			} else {
+				// Pass the decoded payload along for use in subsequent routes.
+				req.decoded = decoded;
+				next();
+			}
+		});
+	} else {
+		// No token. (403 Forbidden)
+		res.status(403).json({
+			status: status.FAIL,
+			data: {
+				token: 'An access token is required.',
+			},
+		});
+	}
 });
 
 // Protected routes.
