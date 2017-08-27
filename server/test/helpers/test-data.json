@@ -1,0 +1,27 @@
+{
+	"users": {
+		"admin": {
+			"name": "test admin",
+			"password": "password"
+		},
+		"normal": {
+			"name": "test user",
+			"password": "password"
+		}
+	},
+	"blogPosts": {
+		"full": {
+			"title": "test post",
+			"author": "test author",
+			"created": "2000-01-01",
+			"modified": "2000-01-02",
+			"tags": "{'test tag 1', 'test tag 2'}",
+			"body": "<p>Test body paragraph with <strong>strong text</bold>.</p>"
+		},
+		"minimum": {
+			"title": "test post",
+			"author": "test author",
+			"created": "2000-01-01"
+		}
+	}
+}
