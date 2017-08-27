@@ -174,7 +174,7 @@ function createBlogPost(req, res) {
 			data.created = 'A created timestamp is required.';
 		}
 
-		req.json({
+		res.json({
 			status: 'fail',
 			data,
 		});
