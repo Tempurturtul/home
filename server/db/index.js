@@ -159,19 +159,51 @@ function getBlogPostById(req, res) {
  * @param {object} res - Express.js Response object.
  */
 function createBlogPost(req, res) {
-	const { title, author, created, modified, tags, body } = req.body;
+	const { title, author, tags, body } = req.body;
 
-	if (!title || !author || !created) {
+	let created;
+	let modified;
+
+	let invalidCreatedTimetamp = false;
+	let invalidModifiedTimetamp = false;
+
+	// Try to make a created timestamp.
+	try {
+		created = new Date(req.body.created).toISOString();
+	} catch (e) {
+		created = undefined;
+		invalidCreatedTimetamp = true;
+	}
+
+	// If a modified value is provided, try to make a modified timestamp.
+	if (req.body.modified) {
+		try {
+			modified = new Date(req.body.modified).toISOString();
+		} catch (e) {
+			modified = undefined;
+			invalidModifiedTimetamp = true;
+		}
+	}
+
+	if (!title || !author || !created || invalidCreatedTimetamp || invalidModifiedTimetamp) {
 		const data = {};
 
 		if (!title) {
 			data.title = 'A title is required.';
 		}
+
 		if (!author) {
 			data.author = 'An author is required.';
 		}
-		if (!created) {
+
+		if (invalidCreatedTimetamp) {
+			data.created = 'Invalid created timestamp. Try using ISO format (YYYY-MM-DDTHH:mm:ss.sssZ).';
+		} else if (!created) {
 			data.created = 'A created timestamp is required.';
+		}
+
+		if (invalidModifiedTimetamp) {
+			data.modified = 'Invalid modified timestamp. Try using ISO format (YYYY-MM-DDTHH:mm:ss.sssZ).';
 		}
 
 		res.json({
