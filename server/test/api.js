@@ -182,112 +182,110 @@ test('POST /api/v1/blog-posts - success, minimum', async (t) => {
 	t.not(res.body.data, undefined);
 });
 
-// TODO - Fix below tests.
+test('POST /api/v1/blog-posts - fail, no title', async (t) => {
+	t.plan(5);
 
-// test('POST /api/v1/blog-posts - fail, no title', async (t) => {
-// 	t.plan(3);
-//
-// 	const token = await getToken(t.context.app, admin.name, admin.password);
-//
-// 	const res = await request(t.context.app)
-// 		.post('/api/v1/blog-posts')
-// 		.send({
-// 			token,
-// 			title: '',
-// 			author: 'bar mar',
-// 			created: '2010-01-01',
-// 			modified: '2012-12-12',
-// 			tags: [
-// 				'maximum',
-// 				'overdrive',
-// 			],
-// 			body: '<p>Lorem ipsum etc.</p>',
-// 		});
-//
-// 	t.is(res.status, 200);
-// 	t.is(res.body.status, 'fail');
-// 	t.not(res.body.data.title, undefined);
-// 	t.is(res.body.data.author, undefined);
-// 	t.is(res.body.data.created, undefined);
-// });
-//
-// test('POST /api/v1/blog-posts - fail, no author', async (t) => {
-// 	t.plan(3);
-//
-// 	const token = await getToken(t.context.app, admin.name, admin.password);
-//
-// 	const res = await request(t.context.app)
-// 		.post('/api/v1/blog-posts')
-// 		.send({
-// 			token,
-// 			title: 'Foo',
-// 			author: '',
-// 			created: '2010-01-01',
-// 			modified: '2012-12-12',
-// 			tags: [
-// 				'maximum',
-// 				'overdrive',
-// 			],
-// 			body: '<p>Lorem ipsum etc.</p>',
-// 		});
-//
-// 	t.is(res.status, 200);
-// 	t.is(res.body.status, 'fail');
-// 	t.is(res.body.data.title, undefined);
-// 	t.not(res.body.data.author, undefined);
-// 	t.is(res.body.data.created, undefined);
-// });
-//
-// test('POST /api/v1/blog-posts - fail, no created timestamp', async (t) => {
-// 	t.plan(3);
-//
-// 	const token = await getToken(t.context.app, admin.name, admin.password);
-//
-// 	const res = await request(t.context.app)
-// 		.post('/api/v1/blog-posts')
-// 		.send({
-// 			token,
-// 			title: 'Foo',
-// 			author: 'bar mar',
-// 			created: '',
-// 			modified: '2012-12-12',
-// 			tags: [
-// 				'maximum',
-// 				'overdrive',
-// 			],
-// 			body: '<p>Lorem ipsum etc.</p>',
-// 		});
-//
-// 	t.is(res.status, 200);
-// 	t.is(res.body.status, 'fail');
-// 	t.is(res.body.data.title, undefined);
-// 	t.is(res.body.data.author, undefined);
-// 	t.not(res.body.data.created, undefined);
-// });
-//
-// test('POST /api/v1/blog-posts - fail, invalid created timestamp', async (t) => {
-// 	t.plan(3);
-//
-// 	const token = await getToken(t.context.app, admin.name, admin.password);
-//
-// 	const res = await request(t.context.app)
-// 		.post('/api/v1/blog-posts')
-// 		.send({
-// 			token,
-// 			title: 'Foo',
-// 			author: 'bar mar',
-// 			created: 'notadate',
-// 			modified: '2012-12-12',
-// 			tags: [
-// 				'maximum',
-// 				'overdrive',
-// 			],
-// 			body: '<p>Lorem ipsum etc.</p>',
-// 		});
-//
-// 	t.is(res.status, 200);
-// 	t.is(res.body.status, 'fail');
-// 	t.is(res.body.data.title, undefined);
-// 	t.is(res.body.data.author, undefined);
-// 	t.not(res.body.data.created, undefined);
-// });
+	const token = await getToken(t.context.app, admin.name, admin.password);
+
+	const res = await request(t.context.app)
+		.post('/api/v1/blog-posts')
+		.send({
+			token,
+			title: '',
+			author: 'bar mar',
+			created: '2010-01-01',
+			modified: '2012-12-12',
+			tags: [
+				'maximum',
+				'overdrive',
+			],
+			body: '<p>Lorem ipsum etc.</p>',
+		});
+
+	t.is(res.status, 200);
+	t.is(res.body.status, 'fail');
+	t.not(res.body.data.title, undefined);
+	t.is(res.body.data.author, undefined);
+	t.is(res.body.data.created, undefined);
+});
+
+test('POST /api/v1/blog-posts - fail, no author', async (t) => {
+	t.plan(5);
+
+	const token = await getToken(t.context.app, admin.name, admin.password);
+
+	const res = await request(t.context.app)
+		.post('/api/v1/blog-posts')
+		.send({
+			token,
+			title: 'Foo',
+			author: '',
+			created: '2010-01-01',
+			modified: '2012-12-12',
+			tags: [
+				'maximum',
+				'overdrive',
+			],
+			body: '<p>Lorem ipsum etc.</p>',
+		});
+
+	t.is(res.status, 200);
+	t.is(res.body.status, 'fail');
+	t.is(res.body.data.title, undefined);
+	t.not(res.body.data.author, undefined);
+	t.is(res.body.data.created, undefined);
+});
+
+test('POST /api/v1/blog-posts - fail, no created timestamp', async (t) => {
+	t.plan(5);
+
+	const token = await getToken(t.context.app, admin.name, admin.password);
+
+	const res = await request(t.context.app)
+		.post('/api/v1/blog-posts')
+		.send({
+			token,
+			title: 'Foo',
+			author: 'bar mar',
+			created: '',
+			modified: '2012-12-12',
+			tags: [
+				'maximum',
+				'overdrive',
+			],
+			body: '<p>Lorem ipsum etc.</p>',
+		});
+
+	t.is(res.status, 200);
+	t.is(res.body.status, 'fail');
+	t.is(res.body.data.title, undefined);
+	t.is(res.body.data.author, undefined);
+	t.not(res.body.data.created, undefined);
+});
+
+test('POST /api/v1/blog-posts - fail, invalid created timestamp', async (t) => {
+	t.plan(5);
+
+	const token = await getToken(t.context.app, admin.name, admin.password);
+
+	const res = await request(t.context.app)
+		.post('/api/v1/blog-posts')
+		.send({
+			token,
+			title: 'Foo',
+			author: 'bar mar',
+			created: 'notadate',
+			modified: '2012-12-12',
+			tags: [
+				'maximum',
+				'overdrive',
+			],
+			body: '<p>Lorem ipsum etc.</p>',
+		});
+
+	t.is(res.status, 200);
+	t.is(res.body.status, 'fail');
+	t.is(res.body.data.title, undefined);
+	t.is(res.body.data.author, undefined);
+	t.not(res.body.data.created, undefined);
+});
