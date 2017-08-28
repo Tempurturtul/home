@@ -1,26 +1,34 @@
 import test from 'ava';
 import request from 'supertest';
 import resetDB from './helpers/reset-db';
+import populateDB from './helpers/populate-db';
 import makeApp from './helpers/make-app';
 import getToken from './helpers/get-token';
 import testData from './helpers/test-data.json';
 
 const admin = testData.users.admin;
 
+const app = makeApp();
+
+// Before any tests...
 test.before(async () => {
+	// Reset the database.
 	await resetDB();
+
+	// Populate the database with test data.
+	await populateDB();
 });
 
-test.beforeEach((t) => {
-	const app = makeApp();
-	// eslint-disable-next-line
-	t.context.app = app;
+// After all tests, regardless of errors...
+test.after.always(async () => {
+	// Reset the database.
+	await resetDB();
 });
 
 test('POST /api/v1/login - success', async (t) => {
 	t.plan(3);
 
-	const res = await request(t.context.app)
+	const res = await request(app)
 		.post('/api/v1/login')
 		.send({ name: admin.name, password: admin.password });
 
@@ -32,7 +40,7 @@ test('POST /api/v1/login - success', async (t) => {
 test('POST /api/v1/login - fail, wrong password', async (t) => {
 	t.plan(4);
 
-	const res = await request(t.context.app)
+	const res = await request(app)
 		.post('/api/v1/login')
 		.send({ name: admin.name, password: `${admin.password}123` });
 
@@ -45,7 +53,7 @@ test('POST /api/v1/login - fail, wrong password', async (t) => {
 test('POST /api/v1/login - fail, no password', async (t) => {
 	t.plan(4);
 
-	const res = await request(t.context.app)
+	const res = await request(app)
 		.post('/api/v1/login')
 		.send({ name: admin.name, password: '' });
 
@@ -58,7 +66,7 @@ test('POST /api/v1/login - fail, no password', async (t) => {
 test('POST /api/v1/login - fail, wrong name', async (t) => {
 	t.plan(4);
 
-	const res = await request(t.context.app)
+	const res = await request(app)
 		.post('/api/v1/login')
 		.send({ name: `${admin.name}123`, password: admin.password });
 
@@ -71,7 +79,7 @@ test('POST /api/v1/login - fail, wrong name', async (t) => {
 test('POST /api/v1/login - fail, no name', async (t) => {
 	t.plan(4);
 
-	const res = await request(t.context.app)
+	const res = await request(app)
 		.post('/api/v1/login')
 		.send({ name: '', password: admin.password });
 
@@ -84,7 +92,7 @@ test('POST /api/v1/login - fail, no name', async (t) => {
 test('POST /api/v1/login - fail, no name nor password', async (t) => {
 	t.plan(4);
 
-	const res = await request(t.context.app)
+	const res = await request(app)
 		.post('/api/v1/login')
 		.send({ name: '', password: '' });
 
@@ -97,7 +105,7 @@ test('POST /api/v1/login - fail, no name nor password', async (t) => {
 test('GET /api/v1/blog-posts - success', async (t) => {
 	t.plan(3);
 
-	const res = await request(t.context.app)
+	const res = await request(app)
 		.get('/api/v1/blog-posts');
 
 	t.is(res.status, 200);
@@ -108,7 +116,7 @@ test('GET /api/v1/blog-posts - success', async (t) => {
 test('GET /api/v1/blog-posts/:id - success', async (t) => {
 	t.plan(3);
 
-	const res = await request(t.context.app)
+	const res = await request(app)
 		.get('/api/v1/blog-posts/1');
 
 	t.is(res.status, 200);
@@ -119,7 +127,7 @@ test('GET /api/v1/blog-posts/:id - success', async (t) => {
 test('GET /api/v1/blog-posts/:id - fail, wrong id', async (t) => {
 	t.plan(3);
 
-	const res = await request(t.context.app)
+	const res = await request(app)
 		.get('/api/v1/blog-posts/123');
 
 	t.is(res.status, 200);
@@ -130,7 +138,7 @@ test('GET /api/v1/blog-posts/:id - fail, wrong id', async (t) => {
 test('GET /api/v1/blog-posts/:id - fail, invalid id', async (t) => {
 	t.plan(3);
 
-	const res = await request(t.context.app)
+	const res = await request(app)
 		.get('/api/v1/blog-posts/abc');
 
 	t.is(res.status, 200);
@@ -141,9 +149,9 @@ test('GET /api/v1/blog-posts/:id - fail, invalid id', async (t) => {
 test('POST /api/v1/blog-posts - success, full', async (t) => {
 	t.plan(3);
 
-	const token = await getToken(t.context.app, admin.name, admin.password);
+	const token = await getToken(app, admin.name, admin.password);
 
-	const res = await request(t.context.app)
+	const res = await request(app)
 		.post('/api/v1/blog-posts')
 		.send({
 			token,
@@ -166,9 +174,9 @@ test('POST /api/v1/blog-posts - success, full', async (t) => {
 test('POST /api/v1/blog-posts - success, minimum', async (t) => {
 	t.plan(3);
 
-	const token = await getToken(t.context.app, admin.name, admin.password);
+	const token = await getToken(app, admin.name, admin.password);
 
-	const res = await request(t.context.app)
+	const res = await request(app)
 		.post('/api/v1/blog-posts')
 		.send({
 			token,
@@ -185,9 +193,9 @@ test('POST /api/v1/blog-posts - success, minimum', async (t) => {
 test('POST /api/v1/blog-posts - fail, no title', async (t) => {
 	t.plan(5);
 
-	const token = await getToken(t.context.app, admin.name, admin.password);
+	const token = await getToken(app, admin.name, admin.password);
 
-	const res = await request(t.context.app)
+	const res = await request(app)
 		.post('/api/v1/blog-posts')
 		.send({
 			token,
@@ -212,9 +220,9 @@ test('POST /api/v1/blog-posts - fail, no title', async (t) => {
 test('POST /api/v1/blog-posts - fail, no author', async (t) => {
 	t.plan(5);
 
-	const token = await getToken(t.context.app, admin.name, admin.password);
+	const token = await getToken(app, admin.name, admin.password);
 
-	const res = await request(t.context.app)
+	const res = await request(app)
 		.post('/api/v1/blog-posts')
 		.send({
 			token,
@@ -239,9 +247,9 @@ test('POST /api/v1/blog-posts - fail, no author', async (t) => {
 test('POST /api/v1/blog-posts - fail, no created timestamp', async (t) => {
 	t.plan(5);
 
-	const token = await getToken(t.context.app, admin.name, admin.password);
+	const token = await getToken(app, admin.name, admin.password);
 
-	const res = await request(t.context.app)
+	const res = await request(app)
 		.post('/api/v1/blog-posts')
 		.send({
 			token,
@@ -266,9 +274,9 @@ test('POST /api/v1/blog-posts - fail, no created timestamp', async (t) => {
 test('POST /api/v1/blog-posts - fail, invalid created timestamp', async (t) => {
 	t.plan(5);
 
-	const token = await getToken(t.context.app, admin.name, admin.password);
+	const token = await getToken(app, admin.name, admin.password);
 
-	const res = await request(t.context.app)
+	const res = await request(app)
 		.post('/api/v1/blog-posts')
 		.send({
 			token,
