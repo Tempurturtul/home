@@ -25,11 +25,11 @@ test.after.always(async () => {
 	await resetDB();
 });
 
-test('POST /api/v1/login - success', async (t) => {
+test('POST /api/v1/authenticate - success', async (t) => {
 	t.plan(3);
 
 	const res = await request(app)
-		.post('/api/v1/login')
+		.post('/api/v1/authenticate')
 		.send({ name: admin.name, password: admin.password });
 
 	t.is(res.status, 200);
@@ -37,11 +37,11 @@ test('POST /api/v1/login - success', async (t) => {
 	t.not(res.body.data, undefined);
 });
 
-test('POST /api/v1/login - fail, wrong password', async (t) => {
+test('POST /api/v1/authenticate - fail, wrong password', async (t) => {
 	t.plan(4);
 
 	const res = await request(app)
-		.post('/api/v1/login')
+		.post('/api/v1/authenticate')
 		.send({ name: admin.name, password: `${admin.password}123` });
 
 	t.is(res.status, 200);
@@ -50,11 +50,11 @@ test('POST /api/v1/login - fail, wrong password', async (t) => {
 	t.not(res.body.data.password, undefined);
 });
 
-test('POST /api/v1/login - fail, no password', async (t) => {
+test('POST /api/v1/authenticate - fail, no password', async (t) => {
 	t.plan(4);
 
 	const res = await request(app)
-		.post('/api/v1/login')
+		.post('/api/v1/authenticate')
 		.send({ name: admin.name, password: '' });
 
 	t.is(res.status, 200);
@@ -63,11 +63,11 @@ test('POST /api/v1/login - fail, no password', async (t) => {
 	t.not(res.body.data.password, undefined);
 });
 
-test('POST /api/v1/login - fail, wrong name', async (t) => {
+test('POST /api/v1/authenticate - fail, wrong name', async (t) => {
 	t.plan(4);
 
 	const res = await request(app)
-		.post('/api/v1/login')
+		.post('/api/v1/authenticate')
 		.send({ name: `${admin.name}123`, password: admin.password });
 
 	t.is(res.status, 200);
@@ -76,11 +76,11 @@ test('POST /api/v1/login - fail, wrong name', async (t) => {
 	t.is(res.body.data.password, undefined);
 });
 
-test('POST /api/v1/login - fail, no name', async (t) => {
+test('POST /api/v1/authenticate - fail, no name', async (t) => {
 	t.plan(4);
 
 	const res = await request(app)
-		.post('/api/v1/login')
+		.post('/api/v1/authenticate')
 		.send({ name: '', password: admin.password });
 
 	t.is(res.status, 200);
@@ -89,11 +89,11 @@ test('POST /api/v1/login - fail, no name', async (t) => {
 	t.is(res.body.data.password, undefined);
 });
 
-test('POST /api/v1/login - fail, no name nor password', async (t) => {
+test('POST /api/v1/authenticate - fail, no name nor password', async (t) => {
 	t.plan(4);
 
 	const res = await request(app)
-		.post('/api/v1/login')
+		.post('/api/v1/authenticate')
 		.send({ name: '', password: '' });
 
 	t.is(res.status, 200);

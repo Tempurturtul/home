@@ -5,7 +5,7 @@ const db = require('../db');
 const verifyJWT = require('../helpers/middleware/verify-jwt');
 
 // Unprotected routes.
-router.post('/login', db.authenticate);
+router.post('/authenticate', db.authenticate);
 router.get('/blog-posts', db.getBlogPosts);
 router.get('/blog-posts/:id', db.getBlogPostById);
 

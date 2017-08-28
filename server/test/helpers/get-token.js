@@ -2,7 +2,7 @@ import request from 'supertest';
 
 async function getToken(app, name, password) {
 	const res = await request(app)
-		.post('/api/v1/login')
+		.post('/api/v1/authenticate')
 		.send({
 			name,
 			password,
