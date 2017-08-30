@@ -2,6 +2,14 @@
 
 Server for my home on the web.
 
+## API Overview
+
+| Resource 				| `POST` (Create) 						| `GET` (Read) 							| `PUT` (Update) 					| `DELETE` (Delete) 				|
+|-----------------------|---------------------------------------|---------------------------------------|-----------------------------------|-----------------------------------|
+| `/users` 				| Create a new user. 					| Get a list of all users. *(admin)* 	| - 								| - 								|
+| `/users/:name` 		| - 									| Get a user. *(admin, self)* 			| Update a user. *(admin, self)* 	| Delete a user. *(admin, self)* 	|
+| `/blog-posts` 		| Create a new blog post. *(admin)* 	| Get a list of all blog posts. 		| - 								| - 								|
+| `/blog-posts/:id` 	| - 									| Get a blog post. 						| Update a blog post. *(admin)* 	| Delete a blog post. *(admin)* 	|
 
 ## Quickstart (Ubuntu)
 
