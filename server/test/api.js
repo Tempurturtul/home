@@ -1,6 +1,6 @@
 import test from 'ava';
 import request from 'supertest';
-import resetDB from './helpers/reset-db';
+import emptyDB from './helpers/empty-db';
 import populateDB from './helpers/populate-db';
 import makeApp from './helpers/make-app';
 import getToken from './helpers/get-token';
@@ -12,8 +12,8 @@ const app = makeApp();
 
 // Before any tests...
 test.before(async () => {
-	// Reset the database.
-	await resetDB();
+	// Delete everything from the database.
+	await emptyDB();
 
 	// Populate the database with test data.
 	await populateDB();
@@ -21,8 +21,8 @@ test.before(async () => {
 
 // After all tests, regardless of errors...
 test.after.always(async () => {
-	// Reset the database.
-	await resetDB();
+	// Delete everything from the database.
+	await emptyDB();
 });
 
 test('POST /api/v1/authenticate - success', async (t) => {
