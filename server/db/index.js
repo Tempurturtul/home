@@ -151,31 +151,26 @@ function getBlogPostById(req, res) {
  * Provides the result of inserting a blog post in the data portion of the JSON
  * response if the blog post is successfully inserted. JSend-compliant.
  * @param {object} req - Express.js Request object.
+ * @param {object} req.decoded - Decoded JSON web token payload, automatically
+ * provided by middleware.
+ * @param {bool} req.decoded.name - User's name.
  * @param {object} req.body - Data submitted in the request body.
- * @param {string} req.body.title - The blog post title.
- * @param {string} req.body.author - The blog post author.
+ * @param {string} [req.body.title] - The blog post title.
  * @param {string[]} [req.body.tags] - The blog post tags.
  * @param {string} [req.body.body] - The blog post body.
  * @param {object} res - Express.js Response object.
  */
 function createBlogPost(req, res) {
-	const { title, author, tags, body } = req.body;
+	const { title, tags, body } = req.body;
+	const author = req.decoded.name;
 	const created = new Date().toISOString();
 
-	if (!title || !author) {
-		const data = {};
-
-		if (!title) {
-			data.title = 'A title is required.';
-		}
-
-		if (!author) {
-			data.author = 'An author is required.';
-		}
-
+	if (!title) {
 		res.json({
 			status: 'fail',
-			data,
+			data: {
+				title: 'A title is required.',
+			},
 		});
 	} else {
 		const queryStr = 'INSERT INTO ' +

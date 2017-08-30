@@ -1,16 +1,16 @@
 // Responses are JSend-compliant JSON. (http://labs.omniti.com/labs/jsend)
 
 /**
- * Requires that a user is admin before proceeding. In case of an error or
+ * Verifies that a user is admin before proceeding. In case of an error or
  * non-admin user, responses are JSend-compliant JSON.
  * @param {object} req - Express.js Request object.
- * @param {string} [req.decoded] - Decoded JSON web token payload.
+ * @param {object} [req.decoded] - Decoded JSON web token payload.
  * @param {bool} [req.decoded.admin] - User's admin status.
  * @param {object} res - Express.js Response object.
  * @param {function} next - Function to procceed to the next Express.js
  * middleware.
  */
-function requireAdmin(req, res, next) {
+function verifyAdmin(req, res, next) {
 	const user = req.decoded;
 
 	if (user && user.admin) {
@@ -27,4 +27,4 @@ function requireAdmin(req, res, next) {
 	}
 }
 
-module.exports = requireAdmin;
+module.exports = verifyAdmin;

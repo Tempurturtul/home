@@ -3,7 +3,7 @@
 const router = require('express').Router();
 const db = require('../db');
 const verifyJWT = require('../helpers/middleware/verify-jwt');
-const requireAdmin = require('../helpers/middleware/require-admin');
+const verifyAdmin = require('../helpers/middleware/verify-admin');
 
 // Unprotected routes.
 router.post('/authenticate', db.authenticate);
@@ -12,8 +12,8 @@ router.get('/blog-posts/:id', db.getBlogPostById);
 
 // Route middleware to verify tokens.
 router.use(verifyJWT);
-// Route middleware to require admin.
-router.use(requireAdmin);
+// Route middleware to verify admin.
+router.use(verifyAdmin);
 
 // Admin-only routes.
 router.post('/blog-posts', db.createBlogPost);
