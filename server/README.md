@@ -3,13 +3,11 @@
 Server for my home on the web.
 
 
-## Development Quickstart (Ubuntu)
+## Quickstart (Ubuntu)
+
+### Install Dependencies:
 
 ```bash
-# ---------------------
-# Install Dependencies:
-# ---------------------
-
 # Install git.
 sudo apt install git
 
@@ -24,11 +22,9 @@ sudo npm install --global npm
 sudo apt-get install postgresql postgresql-contrib
 ```
 
-```bash
-# ----------------------------
-# Set Up Project and Database:
-# ----------------------------
+### Set Up Project:
 
+```bash
 # Clone repository.
 git clone https://github.com/Tempurturtul/home.git
 
@@ -37,23 +33,32 @@ cd home/server
 
 # Install Node.js project dependencies.
 npm install
+```
 
+Create a `config.js` file using [`config.template.js`](./config.template.js) as a template.
+
+- A typical local database connection string should look like the following on Ubuntu:
+	- `postgres://user:password@localhost:5432/home`
+
+### Set Up Local Database:
+
+***In the following, use the user and password defined in your `config.js` file.***
+
+```bash
 # Create database using provided file.
-sudo --user=postgres psql --file=db/home.sql
+sudo --user=YOUR_USER psql --file=db/home.sql
 
 # Create a password for the database.
-sudo --user=postgres psql home
+sudo --user=YOUR_USER psql home
 # postgres=# \password
-# Enter new password:
-# Enter it again:
+# Enter new password: YOUR_PASSWORD
+# Enter it again: YOUR_PASSWORD
 # postgres=# \q
 ```
 
-```bash
-# -----
-# Usage
-# -----
+### Usage:
 
+```bash
 # Start server. (Ctrl-c to cancel.)
 npm start
 
