@@ -20,9 +20,11 @@ sudo apt-get install -y nodejs
 # Update npm.
 sudo npm install --global npm
 
-# Install PostgreSQL server.
+# Install PostgreSQL.
 sudo apt-get install postgresql postgresql-contrib
+```
 
+```bash
 # ----------------------------
 # Set Up Project and Database:
 # ----------------------------
@@ -45,7 +47,9 @@ sudo --user=postgres psql home
 # Enter new password:
 # Enter it again:
 # postgres=# \q
+```
 
+```bash
 # -----
 # Usage
 # -----

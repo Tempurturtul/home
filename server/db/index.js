@@ -152,40 +152,15 @@ function getBlogPostById(req, res) {
  * @param {object} req.body - Data submitted in the request body.
  * @param {string} req.body.title - The blog post title.
  * @param {string} req.body.author - The blog post author.
- * @param {date} req.body.created - The blog post created timestamp.
- * @param {date} [req.body.modified] - The blog post modified timestamp.
  * @param {string[]} [req.body.tags] - The blog post tags.
  * @param {string} [req.body.body] - The blog post body.
  * @param {object} res - Express.js Response object.
  */
 function createBlogPost(req, res) {
 	const { title, author, tags, body } = req.body;
+	const created = new Date().toISOString();
 
-	let created;
-	let modified;
-
-	let invalidCreatedTimetamp = false;
-	let invalidModifiedTimetamp = false;
-
-	// Try to make a created timestamp.
-	try {
-		created = new Date(req.body.created).toISOString();
-	} catch (e) {
-		created = undefined;
-		invalidCreatedTimetamp = true;
-	}
-
-	// If a modified value is provided, try to make a modified timestamp.
-	if (req.body.modified) {
-		try {
-			modified = new Date(req.body.modified).toISOString();
-		} catch (e) {
-			modified = undefined;
-			invalidModifiedTimetamp = true;
-		}
-	}
-
-	if (!title || !author || !created || invalidCreatedTimetamp || invalidModifiedTimetamp) {
+	if (!title || !author) {
 		const data = {};
 
 		if (!title) {
@@ -196,27 +171,17 @@ function createBlogPost(req, res) {
 			data.author = 'An author is required.';
 		}
 
-		if (invalidCreatedTimetamp) {
-			data.created = 'Invalid created timestamp. Try using ISO format (YYYY-MM-DDTHH:mm:ss.sssZ).';
-		} else if (!created) {
-			data.created = 'A created timestamp is required.';
-		}
-
-		if (invalidModifiedTimetamp) {
-			data.modified = 'Invalid modified timestamp. Try using ISO format (YYYY-MM-DDTHH:mm:ss.sssZ).';
-		}
-
 		res.json({
 			status: 'fail',
 			data,
 		});
 	} else {
 		const queryStr = 'INSERT INTO ' +
-			'blogPosts(title, author, created, modified, tags, body) ' +
-			'VALUES($1, $2, $3, $4, $5, $6) ' +
+			'blogPosts(title, author, created, tags, body) ' +
+			'VALUES($1, $2, $3, $4, $5) ' +
 			'RETURNING id';
 
-		db.one(queryStr, [title, author, created, modified, tags, body])
+		db.one(queryStr, [title, author, created, tags, body])
 			.then((data) => {
 				res.json({
 					status: 'success',
