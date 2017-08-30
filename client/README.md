@@ -2,32 +2,58 @@
 
 Client for my home on the web.
 
-## Build Setup
+## Quickstart (Ubuntu)
+
+### Install Dependencies:
+
+```bash
+# Install git.
+sudo apt install git
+
+# Install Node.js.
+curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -
+sudo apt-get install -y nodejs
+
+# Update npm.
+sudo npm install --global npm
+```
+
+### Set Up Project:
+
+```bash
+# Clone repository.
+git clone https://github.com/Tempurturtul/home.git
+
+# Navigate to client package in repository.
+cd home/client
+
+# Install Node.js project dependencies.
+npm install
+```
+
+### Usage:
 
 ``` bash
-# install dependencies
-npm install
-
-# serve with hot reload at localhost:8080
+# Serve with hot reload at localhost:8080. (Ctrl-c to cancel.)
 npm run dev
 
-# build for production with minification
+# Build for production with minification.
 npm run build
 
-# build for production and view the bundle analyzer report
+# Build for production and view the bundle analyzer report.
 npm run build --report
 
-# run unit tests
+# Run unit tests.
 npm run unit
 
-# run e2e tests
+# Run end-to-end tests.
 npm run e2e
 
-# run all tests
+# Run all tests.
 npm test
 ```
 
-For details, see the [guide for the webpack vuejs template](https://github.com/vuejs-templates/webpack) and [docs for vue-loader](http://vuejs.github.io/vue-loader).
+For usage details, see the [guide for the webpack vuejs template](https://github.com/vuejs-templates/webpack) and [docs for vue-loader](http://vuejs.github.io/vue-loader).
 
 ## Acknowledgements
 
