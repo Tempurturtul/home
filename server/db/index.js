@@ -8,7 +8,8 @@ const db = pgp(config.database);
 
 /**
  * Provides a signed JSON web token in the data portion of the JSON response if
- * the user name and password are successfully authenticated. JSend-compliant.
+ * the user name and password are successfully authenticated. The token payload
+ * contains the user's data as retrieved from the database. JSend-compliant.
  * @param {object} req - Express.js Request object.
  * @param {object} req.body - Data submitted in the request body.
  * @param {string} req.body.name - The user's name.
@@ -24,6 +25,7 @@ function authenticate(req, res) {
 		if (!name) {
 			data.name = 'A name is required.';
 		}
+
 		if (!password) {
 			data.password = 'A password is required.';
 		}
