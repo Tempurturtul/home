@@ -4,6 +4,7 @@ import emptyDB from './helpers/empty-db';
 import populateDB from './helpers/populate-db';
 import makeApp from './helpers/make-app';
 import getToken from './helpers/get-token';
+import getBlogPostID from './helpers/get-blog-post-id';
 import testData from './helpers/test-data.json';
 
 const admin = testData.users.admin;
@@ -23,6 +24,109 @@ test.before(async () => {
 test.after.always(async () => {
 	// Delete everything from the database.
 	await emptyDB();
+});
+
+test.skip('POST /api/v1/register - success', async (t) => {
+	t.plan(3);
+
+	const res = await request(app)
+		.post('/api/v1/register')
+		.send({ name: 'Barry Boron', password: 'Pattycakes' });
+
+	t.is(res.status, 200);
+	t.is(res.body.status, 'success');
+	t.not(res.body.data, undefined);
+});
+
+test.skip('POST /api/v1/register - fail, name exists', async (t) => {
+	t.plan(4);
+
+	const res = await request(app)
+		.post('/api/v1/register')
+		.send({ name: admin.name, password: 'Pattycakes' });
+
+	t.is(res.status, 200);
+	t.is(res.body.status, 'fail');
+	t.not(res.body.data.name, undefined);
+	t.is(res.body.data.password, undefined);
+});
+
+test.skip('POST /api/v1/register - fail, invalid name', async (t) => {
+	t.plan(4);
+
+	const res = await request(app)
+		.post('/api/v1/register')
+		.send({ name: '.', password: 'Pattycakes' });
+
+	t.is(res.status, 200);
+	t.is(res.body.status, 'fail');
+	t.not(res.body.data.name, undefined);
+	t.is(res.body.data.password, undefined);
+});
+
+test.skip('POST /api/v1/register - fail, no name', async (t) => {
+	t.plan(4);
+
+	const res = await request(app)
+		.post('/api/v1/register')
+		.send({ name: '', password: 'Pattycakes' });
+
+	t.is(res.status, 200);
+	t.is(res.body.status, 'fail');
+	t.not(res.body.data.name, undefined);
+	t.is(res.body.data.password, undefined);
+});
+
+test.skip('POST /api/v1/register - fail, invalid password', async (t) => {
+	t.plan(4);
+
+	const res = await request(app)
+		.post('/api/v1/register')
+		.send({ name: 'Barry Boron', password: 'a' });
+
+	t.is(res.status, 200);
+	t.is(res.body.status, 'fail');
+	t.is(res.body.data.name, undefined);
+	t.not(res.body.data.password, undefined);
+});
+
+test.skip('POST /api/v1/register - fail, no password', async (t) => {
+	t.plan(4);
+
+	const res = await request(app)
+		.post('/api/v1/register')
+		.send({ name: 'Barry Boron', password: '' });
+
+	t.is(res.status, 200);
+	t.is(res.body.status, 'fail');
+	t.is(res.body.data.name, undefined);
+	t.not(res.body.data.password, undefined);
+});
+
+test.skip('POST /api/v1/register - fail, no name nor password', async (t) => {
+	t.plan(4);
+
+	const res = await request(app)
+		.post('/api/v1/register')
+		.send({ name: '', password: '' });
+
+	t.is(res.status, 200);
+	t.is(res.body.status, 'fail');
+	t.not(res.body.data.name, undefined);
+	t.not(res.body.data.password, undefined);
+});
+
+test.skip('POST /api/v1/register - fail, invalid name and password', async (t) => {
+	t.plan(4);
+
+	const res = await request(app)
+		.post('/api/v1/register')
+		.send({ name: '.', password: 'a' });
+
+	t.is(res.status, 200);
+	t.is(res.body.status, 'fail');
+	t.not(res.body.data.name, undefined);
+	t.not(res.body.data.password, undefined);
 });
 
 test('POST /api/v1/authenticate - success', async (t) => {
@@ -116,8 +220,10 @@ test('GET /api/v1/blog-posts - success', async (t) => {
 test('GET /api/v1/blog-posts/:id - success', async (t) => {
 	t.plan(3);
 
+	const id = await getBlogPostID(app);
+
 	const res = await request(app)
-		.get('/api/v1/blog-posts/1');
+		.get(`/api/v1/blog-posts/${id}`);
 
 	t.is(res.status, 200);
 	t.is(res.body.status, 'success');
@@ -128,7 +234,7 @@ test('GET /api/v1/blog-posts/:id - fail, wrong id', async (t) => {
 	t.plan(3);
 
 	const res = await request(app)
-		.get('/api/v1/blog-posts/123');
+		.get('/api/v1/blog-posts/12300');
 
 	t.is(res.status, 200);
 	t.is(res.body.status, 'fail');
