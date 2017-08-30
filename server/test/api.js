@@ -8,6 +8,7 @@ import getBlogPostID from './helpers/get-blog-post-id';
 import testData from './helpers/test-data.json';
 
 const admin = testData.users.admin;
+const user = testData.users.normal;
 
 const app = makeApp();
 
@@ -304,11 +305,6 @@ test('POST /api/v1/blog-posts - fail, no title', async (t) => {
 			token,
 			title: '',
 			author: 'bar mar',
-			tags: [
-				'maximum',
-				'overdrive',
-			],
-			body: '<p>Lorem ipsum etc.</p>',
 		});
 
 	t.is(res.status, 200);
@@ -328,15 +324,43 @@ test('POST /api/v1/blog-posts - fail, no author', async (t) => {
 			token,
 			title: 'Foo',
 			author: '',
-			tags: [
-				'maximum',
-				'overdrive',
-			],
-			body: '<p>Lorem ipsum etc.</p>',
 		});
 
 	t.is(res.status, 200);
 	t.is(res.body.status, 'fail');
 	t.is(res.body.data.title, undefined);
 	t.not(res.body.data.author, undefined);
+});
+
+test('POST /api/v1/blog-posts - fail, no token', async (t) => {
+	t.plan(3);
+
+	const res = await request(app)
+		.post('/api/v1/blog-posts')
+		.send({
+			title: 'Foo',
+			author: 'bar mar',
+		});
+
+	t.is(res.status, 403);
+	t.is(res.body.status, 'fail');
+	t.not(res.body.data.token, undefined);
+});
+
+test('POST /api/v1/blog-posts - fail, not admin', async (t) => {
+	t.plan(3);
+
+	const token = await getToken(app, user.name, user.password);
+
+	const res = await request(app)
+		.post('/api/v1/blog-posts')
+		.send({
+			token,
+			title: 'Foo',
+			author: 'bar mar',
+		});
+
+	t.is(res.status, 403);
+	t.is(res.body.status, 'fail');
+	t.not(res.body.data.admin, undefined);
 });
