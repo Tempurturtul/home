@@ -18,5 +18,6 @@ router.use(verifyAdmin);
 // Admin-only routes.
 router.post('/blog-posts', db.createBlogPost);
 router.put('/blog-posts/:id', db.updateBlogPost);
+router.delete('/blog-posts/:id', db.deleteBlogPost);
 
 module.exports = router;

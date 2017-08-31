@@ -256,11 +256,65 @@ function updateBlogPost(req, res) {
 	}
 }
 
+/**
+ * Provides the result of deleting a blog post in the data portion of the JSON
+ * response if the blog post is successfully deleted. JSend-compliant.
+ * @param {object} req - Express.js Request object.
+ * @param {object} req.decoded - Decoded JSON web token payload, automatically
+ * provided by middleware.
+ * @param {bool} req.decoded.name - User's name.
+ * @param {object} req.params - Data submitted as route parameters.
+ * @param {string|number} req.params.id - The blog post ID. Must be an integer or
+ * string representation of an integer.
+ * @param {object} res - Express.js Response object.
+ */
+function deleteBlogPost(req, res) {
+	const id = Number(req.params.id);
+
+	if (!Number.isInteger(id)) {
+		res.json({
+			status: 'fail',
+			data: {
+				id: 'An integer id is required.',
+			},
+		});
+	} else {
+		const queryStr = 'DELETE FROM blogPosts ' +
+			'WHERE id = $1 ' +
+			'RETURNING id';
+
+		db.oneOrNone(queryStr, [id])
+			.then((data) => {
+				if (!data) {
+					res.json({
+						status: 'fail',
+						data: {
+							id: 'No blog post with that ID exists.',
+						},
+					});
+				} else {
+					res.json({
+						status: 'success',
+						data,
+					});
+				}
+			})
+			.catch((err) => {
+				res.json({
+					status: 'error',
+					message: 'Error deleting blog post.',
+					data: err,
+				});
+			});
+	}
+}
+
 module.exports = {
 	authenticate,
 	getBlogPosts,
 	getBlogPostById,
 	createBlogPost,
 	updateBlogPost,
+	deleteBlogPost,
 	database: db, 	// The actual database instance.
 };
