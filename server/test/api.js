@@ -472,3 +472,42 @@ test('PUT /api/v1/blog-posts/:id - success, no changes', async (t) => {
 	t.not(res.body.data, undefined);
 	t.deepEqual(post, retrievedPost);
 });
+
+test('PUT /api/v1/blog-posts/:id - fail, no token', async (t) => {
+	t.plan(5);
+
+	const id = await getNextBlogPostID(app);
+
+	const res = await request(app)
+		.put(`/api/v1/blog-posts/${id}`)
+		.send({
+			title: 'Pizza',
+		});
+
+	t.is(res.status, 403);
+	t.is(res.body.status, 'fail');
+	t.not(res.body.data.token, undefined);
+	t.is(res.body.data.title, undefined);
+	t.is(res.body.data.admin, undefined);
+});
+
+test('PUT /api/v1/blog-posts - fail, not admin', async (t) => {
+	t.plan(5);
+
+	const id = await getNextBlogPostID(app);
+
+	const token = await getToken(app, user.name, user.password);
+
+	const res = await request(app)
+		.put(`/api/v1/blog-posts/${id}`)
+		.send({
+			token,
+			title: 'Pizza',
+		});
+
+	t.is(res.status, 403);
+	t.is(res.body.status, 'fail');
+	t.is(res.body.data.token, undefined);
+	t.is(res.body.data.title, undefined);
+	t.not(res.body.data.admin, undefined);
+});
