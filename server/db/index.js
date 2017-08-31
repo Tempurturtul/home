@@ -105,8 +105,8 @@ function getBlogPosts(req, res) {
  * Provides the blog post matching the ID in the data portion of the JSON
  * response if the ID matches any blog post. JSend-compliant.
  * @param {object} req - Express.js Request object.
- * @param {object} req.body - Data submitted in the request body.
- * @param {string|number} req.body.id - The blog post ID. Must be an integer or
+ * @param {object} req.params - Data submitted as route parameters.
+ * @param {string|number} req.params.id - The blog post ID. Must be an integer or
  * string representation of an integer.
  * @param {object} res - Express.js Response object.
  */
@@ -195,10 +195,63 @@ function createBlogPost(req, res) {
 	}
 }
 
+/**
+ * Provides the result of updating a blog post in the data portion of the JSON
+ * response if the blog post is successfully updated. JSend-compliant.
+ * @param {object} req - Express.js Request object.
+ * @param {object} req.decoded - Decoded JSON web token payload, automatically
+ * provided by middleware.
+ * @param {bool} req.decoded.name - User's name.
+ * @param {object} req.params - Data submitted as route parameters.
+ * @param {string|number} req.params.id - The blog post ID. Must be an integer or
+ * string representation of an integer.
+ * @param {object} req.body - Data submitted in the request body.
+ * @param {string} [req.body.title] - The blog post title.
+ * @param {string[]} [req.body.tags] - The blog post tags.
+ * @param {string} [req.body.body] - The blog post body.
+ * @param {object} res - Express.js Response object.
+ */
+function updateBlogPost(req, res) {
+	const id = Number(req.params.id);
+
+	if (!Number.isInteger(id)) {
+		res.json({
+			status: 'fail',
+			data: {
+				id: 'An integer id is required.',
+			},
+		});
+	} else {
+		const { title, tags, body } = req.body;
+		const modified = new Date().toISOString();
+
+		const queryStr = 'UPDATE blogPosts ' +
+			'SET title = $2, modified = $3, tags = $4, body = $5 ' +
+			'WHERE id = $1 ' +
+			'RETURNING id';
+
+		db.one(queryStr, [id, title, modified, tags, body])
+			.then((data) => {
+				res.json({
+					status: 'success',
+					data,
+				});
+			})
+			.catch((err) => {
+				res.json({
+					status: 'error',
+					message: 'Error updating blog post.',
+					data: err,
+				});
+			});
+	}
+}
+
 module.exports = {
 	authenticate,
 	getBlogPosts,
 	getBlogPostById,
 	createBlogPost,
+	updateBlogPost,
 	database: db, 	// The actual database instance.
 };
