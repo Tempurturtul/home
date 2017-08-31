@@ -27,11 +27,11 @@ test.after.always(async () => {
 	await emptyDB();
 });
 
-test.skip('POST /api/v1/register - success', async (t) => {
+test.skip('POST /api/v1/users - success', async (t) => {
 	t.plan(3);
 
 	const res = await request(app)
-		.post('/api/v1/register')
+		.post('/api/v1/users')
 		.send({ name: 'Barry Boron', password: 'Pattycakes' });
 
 	t.is(res.status, 200);
@@ -39,11 +39,11 @@ test.skip('POST /api/v1/register - success', async (t) => {
 	t.not(res.body.data, undefined);
 });
 
-test.skip('POST /api/v1/register - fail, name exists', async (t) => {
+test.skip('POST /api/v1/users - fail, name exists', async (t) => {
 	t.plan(4);
 
 	const res = await request(app)
-		.post('/api/v1/register')
+		.post('/api/v1/users')
 		.send({ name: admin.name, password: 'Pattycakes' });
 
 	t.is(res.status, 200);
@@ -52,11 +52,11 @@ test.skip('POST /api/v1/register - fail, name exists', async (t) => {
 	t.is(res.body.data.password, undefined);
 });
 
-test.skip('POST /api/v1/register - fail, invalid name', async (t) => {
+test.skip('POST /api/v1/users - fail, invalid name', async (t) => {
 	t.plan(4);
 
 	const res = await request(app)
-		.post('/api/v1/register')
+		.post('/api/v1/users')
 		.send({ name: '.', password: 'Pattycakes' });
 
 	t.is(res.status, 200);
@@ -65,11 +65,11 @@ test.skip('POST /api/v1/register - fail, invalid name', async (t) => {
 	t.is(res.body.data.password, undefined);
 });
 
-test.skip('POST /api/v1/register - fail, no name', async (t) => {
+test.skip('POST /api/v1/users - fail, no name', async (t) => {
 	t.plan(4);
 
 	const res = await request(app)
-		.post('/api/v1/register')
+		.post('/api/v1/users')
 		.send({ name: '', password: 'Pattycakes' });
 
 	t.is(res.status, 200);
@@ -78,11 +78,11 @@ test.skip('POST /api/v1/register - fail, no name', async (t) => {
 	t.is(res.body.data.password, undefined);
 });
 
-test.skip('POST /api/v1/register - fail, invalid password', async (t) => {
+test.skip('POST /api/v1/users - fail, invalid password', async (t) => {
 	t.plan(4);
 
 	const res = await request(app)
-		.post('/api/v1/register')
+		.post('/api/v1/users')
 		.send({ name: 'Barry Boron', password: 'a' });
 
 	t.is(res.status, 200);
@@ -91,11 +91,11 @@ test.skip('POST /api/v1/register - fail, invalid password', async (t) => {
 	t.not(res.body.data.password, undefined);
 });
 
-test.skip('POST /api/v1/register - fail, no password', async (t) => {
+test.skip('POST /api/v1/users - fail, no password', async (t) => {
 	t.plan(4);
 
 	const res = await request(app)
-		.post('/api/v1/register')
+		.post('/api/v1/users')
 		.send({ name: 'Barry Boron', password: '' });
 
 	t.is(res.status, 200);
@@ -104,11 +104,11 @@ test.skip('POST /api/v1/register - fail, no password', async (t) => {
 	t.not(res.body.data.password, undefined);
 });
 
-test.skip('POST /api/v1/register - fail, no name nor password', async (t) => {
+test.skip('POST /api/v1/users - fail, no name nor password', async (t) => {
 	t.plan(4);
 
 	const res = await request(app)
-		.post('/api/v1/register')
+		.post('/api/v1/users')
 		.send({ name: '', password: '' });
 
 	t.is(res.status, 200);
@@ -117,11 +117,11 @@ test.skip('POST /api/v1/register - fail, no name nor password', async (t) => {
 	t.not(res.body.data.password, undefined);
 });
 
-test.skip('POST /api/v1/register - fail, invalid name and password', async (t) => {
+test.skip('POST /api/v1/users - fail, invalid name and password', async (t) => {
 	t.plan(4);
 
 	const res = await request(app)
-		.post('/api/v1/register')
+		.post('/api/v1/users')
 		.send({ name: '.', password: 'a' });
 
 	t.is(res.status, 200);
