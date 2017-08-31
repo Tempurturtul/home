@@ -473,7 +473,7 @@ test('PUT /api/v1/blog-posts/:id - success, no changes', async (t) => {
 	t.deepEqual(post, retrievedPost);
 });
 
-test('PUT /api/v1/blog-posts - fail, wrong id', async (t) => {
+test('PUT /api/v1/blog-posts/:id - fail, wrong id', async (t) => {
 	t.plan(6);
 
 	const token = await getToken(app, admin.name, admin.password);
@@ -493,7 +493,7 @@ test('PUT /api/v1/blog-posts - fail, wrong id', async (t) => {
 	t.not(res.body.data.id, undefined);
 });
 
-test('PUT /api/v1/blog-posts - fail, invalid id', async (t) => {
+test('PUT /api/v1/blog-posts/:id - fail, invalid id', async (t) => {
 	t.plan(6);
 
 	const token = await getToken(app, admin.name, admin.password);
@@ -531,7 +531,7 @@ test('PUT /api/v1/blog-posts/:id - fail, no token', async (t) => {
 	t.is(res.body.data.admin, undefined);
 });
 
-test('PUT /api/v1/blog-posts - fail, not admin', async (t) => {
+test('PUT /api/v1/blog-posts/:id - fail, not admin', async (t) => {
 	t.plan(5);
 
 	const id = await getNextBlogPostID(app);
@@ -565,15 +565,28 @@ test.skip('DELETE /api/v1/blog-posts/:id - success', async (t) => {
 	t.not(res.body.data, undefined);
 });
 
-test.skip('DELETE /api/v1/blog-posts/:id - success', async (t) => {
+test.skip('DELETE /api/v1/blog-posts/:id - fail, wrong id', async (t) => {
 	t.plan(3);
 
 	const id = await getNextBlogPostID(app);
 
 	const res = await request(app)
-		.delete(`/api/v1/blog-posts/${id}`);
+		.delete(`/api/v1/blog-posts/12300`);
 
 	t.is(res.status, 200);
-	t.is(res.body.status, 'success');
-	t.not(res.body.data, undefined);
+	t.is(res.body.status, 'fail');
+	t.not(res.body.data.id, undefined);
+});
+
+test.skip('DELETE /api/v1/blog-posts/:id - fail, invalid id', async (t) => {
+	t.plan(3);
+
+	const id = await getNextBlogPostID(app);
+
+	const res = await request(app)
+		.delete(`/api/v1/blog-posts/abc`);
+
+	t.is(res.status, 200);
+	t.is(res.body.status, 'fail');
+	t.not(res.body.data.id, undefined);
 });
