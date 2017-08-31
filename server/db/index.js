@@ -230,12 +230,21 @@ function updateBlogPost(req, res) {
 			'WHERE id = $1 ' +
 			'RETURNING id';
 
-		db.one(queryStr, [id, title, modified, tags, body])
+		db.oneOrNone(queryStr, [id, title, modified, tags, body])
 			.then((data) => {
-				res.json({
-					status: 'success',
-					data,
-				});
+				if (!data) {
+					res.json({
+						status: 'fail',
+						data: {
+							id: 'No blog post with that ID exists.',
+						},
+					});
+				} else {
+					res.json({
+						status: 'success',
+						data,
+					});
+				}
 			})
 			.catch((err) => {
 				res.json({
