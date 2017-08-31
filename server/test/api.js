@@ -4,7 +4,7 @@ import emptyDB from './helpers/empty-db';
 import populateDB from './helpers/populate-db';
 import makeApp from './helpers/make-app';
 import getToken from './helpers/get-token';
-import getBlogPostID from './helpers/get-blog-post-id';
+import getNextBlogPostID from './helpers/get-next-blog-post-id';
 import getBlogPost from './helpers/get-blog-post';
 import testData from './helpers/test-data.json';
 
@@ -222,7 +222,7 @@ test('GET /api/v1/blog-posts - success', async (t) => {
 test('GET /api/v1/blog-posts/:id - success', async (t) => {
 	t.plan(3);
 
-	const id = await getBlogPostID(app);
+	const id = await getNextBlogPostID(app);
 
 	const res = await request(app)
 		.get(`/api/v1/blog-posts/${id}`);
@@ -387,4 +387,88 @@ test('POST /api/v1/blog-posts - fail, not admin', async (t) => {
 	t.is(res.body.data.token, undefined);
 	t.is(res.body.data.title, undefined);
 	t.not(res.body.data.admin, undefined);
+});
+
+test('PUT /api/v1/blog-posts/:id - success, full', async (t) => {
+	t.plan(4);
+
+	// Get an admin token.
+	const token = await getToken(app, admin.name, admin.password);
+
+	// Get a blog post to modify.
+	const id = await getNextBlogPostID(app);
+	const originalPost = await getBlogPost(app, id);
+
+	// Define new blog post data.
+	// (Exclude time of day from timestamps to allow slight variation.)
+	const post = {
+		id,
+		title: `${originalPost.title} modified`,
+		author: originalPost.author,
+		created: originalPost.created,
+		modified: new Date().toISOString().split('T')[0],
+		tags: originalPost.tags.concat(['modified']),
+		body: `${originalPost.body} modified`,
+	};
+
+	const res = await request(app)
+		.put(`/api/v1/blog-posts/${id}`)
+		.send({
+			token,
+			title: post.title,
+			tags: post.tags,
+			body: post.body,
+		});
+
+	// Retrieve the newly modified blog post.
+	const retrievedPost = await getBlogPost(app, res.body.data.id);
+	// Trim time of day from modified timestamp to match expected.
+	retrievedPost.modified = retrievedPost.modified.split('T')[0];
+
+	t.is(res.status, 200);
+	t.is(res.body.status, 'success');
+	t.not(res.body.data, undefined);
+	t.deepEqual(post, retrievedPost);
+});
+
+test('PUT /api/v1/blog-posts/:id - success, no changes', async (t) => {
+	t.plan(4);
+
+	// Get an admin token.
+	const token = await getToken(app, admin.name, admin.password);
+
+	// Get a blog post to modify.
+	const id = await getNextBlogPostID(app);
+	const originalPost = await getBlogPost(app, id);
+
+	// Define new blog post data.
+	// (Exclude time of day from timestamps to allow slight variation.)
+	const post = {
+		id,
+		title: originalPost.title,
+		author: originalPost.author,
+		created: originalPost.created,
+		modified: new Date().toISOString().split('T')[0],
+		tags: originalPost.tags,
+		body: originalPost.body,
+	};
+
+	const res = await request(app)
+		.put(`/api/v1/blog-posts/${id}`)
+		.send({
+			token,
+			title: post.title,
+			tags: post.tags,
+			body: post.body,
+		});
+
+	// Retrieve the newly modified blog post.
+	const retrievedPost = await getBlogPost(app, res.body.data.id);
+	// Trim time of day from modified timestamp to match expected.
+	retrievedPost.modified = retrievedPost.modified.split('T')[0];
+
+	t.is(res.status, 200);
+	t.is(res.body.status, 'success');
+	t.not(res.body.data, undefined);
+	t.deepEqual(post, retrievedPost);
 });
