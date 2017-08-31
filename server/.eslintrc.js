@@ -9,6 +9,7 @@ module.exports = {
 	rules: {
 		'no-console': 'off',
 		'no-tabs': 'off',
+		'no-plusplus': 'off',
 		'indent': ['error', 'tab'],
 	},
 };
