@@ -5,6 +5,7 @@ import populateDB from './helpers/populate-db';
 import makeApp from './helpers/make-app';
 import getToken from './helpers/get-token';
 import getBlogPostID from './helpers/get-blog-post-id';
+import getBlogPost from './helpers/get-blog-post';
 import testData from './helpers/test-data.json';
 
 const admin = testData.users.admin;
@@ -219,9 +220,10 @@ test('GET /api/v1/blog-posts - success', async (t) => {
 });
 
 test('GET /api/v1/blog-posts/:id - success', async (t) => {
-	t.plan(3);
+	t.plan(4);
 
 	const id = await getBlogPostID(app);
+	const post = await getBlogPost(app, id);
 
 	const res = await request(app)
 		.get(`/api/v1/blog-posts/${id}`);
@@ -229,6 +231,7 @@ test('GET /api/v1/blog-posts/:id - success', async (t) => {
 	t.is(res.status, 200);
 	t.is(res.body.status, 'success');
 	t.not(res.body.data, undefined);
+	t.deepEqual(res.body.data, post);
 });
 
 test('GET /api/v1/blog-posts/:id - fail, wrong id', async (t) => {
@@ -254,42 +257,84 @@ test('GET /api/v1/blog-posts/:id - fail, invalid id', async (t) => {
 });
 
 test('POST /api/v1/blog-posts - success, full', async (t) => {
-	t.plan(3);
+	t.plan(5);
 
+	// Get an admin token.
 	const token = await getToken(app, admin.name, admin.password);
+	// Assemble expected blog post data.
+	// (Exclude time of day from timestamps to allow slight variation.)
+	const post = {
+		title: 'Foo',
+		author: admin.name,
+		created: new Date().toISOString().split('T')[0],
+		modified: null,
+		tags: [
+			'maximum',
+			'overdrive',
+		],
+		body: '<p>Lorem ipsum etc.</p>',
+	};
 
 	const res = await request(app)
 		.post('/api/v1/blog-posts')
 		.send({
 			token,
-			title: 'Foo',
-			tags: [
-				'maximum',
-				'overdrive',
-			],
-			body: '<p>Lorem ipsum etc.</p>',
+			title: post.title,
+			tags: post.tags,
+			body: post.body,
 		});
+
+	// Retrieve the newly created blog post.
+	const retrievedPost = await getBlogPost(app, res.body.data.id);
+	// Trim time of day from created timestamp to match expected.
+	retrievedPost.created = retrievedPost.created.split('T')[0];
+
+	// Add the returned id to the expected blog post data.
+	post.id = retrievedPost.id;
 
 	t.is(res.status, 200);
 	t.is(res.body.status, 'success');
 	t.not(res.body.data, undefined);
+	t.not(res.body.data.id, undefined);
+	t.deepEqual(post, retrievedPost);
 });
 
 test('POST /api/v1/blog-posts - success, minimum', async (t) => {
-	t.plan(3);
+	t.plan(5);
 
+	// Get an admin token.
 	const token = await getToken(app, admin.name, admin.password);
+	// Assemble expected blog post data.
+	// (Exclude time of day from timestamps to allow slight variation.)
+	const post = {
+		title: 'Foo',
+		author: admin.name,
+		created: new Date().toISOString().split('T')[0],
+		modified: null,
+		tags: null,
+		body: null,
+	};
 
 	const res = await request(app)
 		.post('/api/v1/blog-posts')
 		.send({
 			token,
-			title: 'Foo',
+			title: post.title,
 		});
+
+	// Retrieve the newly created blog post.
+	const retrievedPost = await getBlogPost(app, res.body.data.id);
+	// Trim time of day from created timestamp to match expected.
+	retrievedPost.created = retrievedPost.created.split('T')[0];
+
+	// Add the returned id to the expected blog post data.
+	post.id = retrievedPost.id;
 
 	t.is(res.status, 200);
 	t.is(res.body.status, 'success');
 	t.not(res.body.data, undefined);
+	t.not(res.body.data.id, undefined);
+	t.deepEqual(post, retrievedPost);
 });
 
 test('POST /api/v1/blog-posts - fail, no title', async (t) => {
