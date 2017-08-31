@@ -220,10 +220,9 @@ test('GET /api/v1/blog-posts - success', async (t) => {
 });
 
 test('GET /api/v1/blog-posts/:id - success', async (t) => {
-	t.plan(4);
+	t.plan(3);
 
 	const id = await getBlogPostID(app);
-	const post = await getBlogPost(app, id);
 
 	const res = await request(app)
 		.get(`/api/v1/blog-posts/${id}`);
@@ -231,7 +230,6 @@ test('GET /api/v1/blog-posts/:id - success', async (t) => {
 	t.is(res.status, 200);
 	t.is(res.body.status, 'success');
 	t.not(res.body.data, undefined);
-	t.deepEqual(res.body.data, post);
 });
 
 test('GET /api/v1/blog-posts/:id - fail, wrong id', async (t) => {
