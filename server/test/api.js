@@ -598,3 +598,34 @@ test('DELETE /api/v1/blog-posts/:id - fail, invalid id', async (t) => {
 	t.is(res.body.status, 'fail');
 	t.not(res.body.data.id, undefined);
 });
+
+test('DELETE /api/v1/blog-posts/:id - fail, no token', async (t) => {
+	t.plan(3);
+
+	const id = await getNextBlogPostID(app);
+
+	const res = await request(app)
+		.delete(`/api/v1/blog-posts/${id}`)
+		.send();
+
+	t.is(res.status, 403);
+	t.is(res.body.status, 'fail');
+	t.not(res.body.data.token, undefined);
+});
+
+test('DELETE /api/v1/blog-posts/:id - fail, not admin', async (t) => {
+	t.plan(4);
+
+	const id = await getNextBlogPostID(app);
+
+	const token = await getToken(app, user.name, user.password);
+
+	const res = await request(app)
+		.delete(`/api/v1/blog-posts/${id}`)
+		.send({ token });
+
+	t.is(res.status, 403);
+	t.is(res.body.status, 'fail');
+	t.is(res.body.data.token, undefined);
+	t.not(res.body.data.admin, undefined);
+});
