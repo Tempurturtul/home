@@ -79,6 +79,54 @@ function authenticate(req, res) {
 }
 
 /**
+ * Provides the result of inserting a blog post in the data portion of the JSON
+ * response if the blog post is successfully inserted. JSend-compliant.
+ * @param {object} req - Express.js Request object.
+ * @param {object} req.decoded - Decoded JSON web token payload, automatically
+ * provided by middleware.
+ * @param {bool} req.decoded.name - User's name.
+ * @param {object} req.body - Data submitted in the request body.
+ * @param {string} [req.body.title] - The blog post title.
+ * @param {string[]} [req.body.tags] - The blog post tags.
+ * @param {string} [req.body.body] - The blog post body.
+ * @param {object} res - Express.js Response object.
+ */
+function createBlogPost(req, res) {
+	const { title, tags, body } = req.body;
+	const author = req.decoded.name;
+	const created = new Date().toISOString();
+
+	if (!title) {
+		res.json({
+			status: 'fail',
+			data: {
+				title: 'A title is required.',
+			},
+		});
+	} else {
+		const queryStr = 'INSERT INTO ' +
+			'blogPosts(title, author, created, tags, body) ' +
+			'VALUES($1, $2, $3, $4, $5) ' +
+			'RETURNING id';
+
+		db.one(queryStr, [title, author, created, tags, body])
+			.then((data) => {
+				res.json({
+					status: 'success',
+					data,
+				});
+			})
+			.catch((err) => {
+				res.json({
+					status: 'error',
+					message: 'Error creating blog post.',
+					data: err,
+				});
+			});
+	}
+}
+
+/**
  * Provides an array of all blog posts in the data portion of the JSON response
  * if the request is successful. JSend-compliant.
  * @param {object} req - Express.js Request object.
@@ -141,54 +189,6 @@ function getBlogPostById(req, res) {
 				res.json({
 					status: 'error',
 					message: 'Error retrieving blog post.',
-					data: err,
-				});
-			});
-	}
-}
-
-/**
- * Provides the result of inserting a blog post in the data portion of the JSON
- * response if the blog post is successfully inserted. JSend-compliant.
- * @param {object} req - Express.js Request object.
- * @param {object} req.decoded - Decoded JSON web token payload, automatically
- * provided by middleware.
- * @param {bool} req.decoded.name - User's name.
- * @param {object} req.body - Data submitted in the request body.
- * @param {string} [req.body.title] - The blog post title.
- * @param {string[]} [req.body.tags] - The blog post tags.
- * @param {string} [req.body.body] - The blog post body.
- * @param {object} res - Express.js Response object.
- */
-function createBlogPost(req, res) {
-	const { title, tags, body } = req.body;
-	const author = req.decoded.name;
-	const created = new Date().toISOString();
-
-	if (!title) {
-		res.json({
-			status: 'fail',
-			data: {
-				title: 'A title is required.',
-			},
-		});
-	} else {
-		const queryStr = 'INSERT INTO ' +
-			'blogPosts(title, author, created, tags, body) ' +
-			'VALUES($1, $2, $3, $4, $5) ' +
-			'RETURNING id';
-
-		db.one(queryStr, [title, author, created, tags, body])
-			.then((data) => {
-				res.json({
-					status: 'success',
-					data,
-				});
-			})
-			.catch((err) => {
-				res.json({
-					status: 'error',
-					message: 'Error creating blog post.',
 					data: err,
 				});
 			});
@@ -311,9 +311,9 @@ function deleteBlogPost(req, res) {
 
 module.exports = {
 	authenticate,
+	createBlogPost,
 	getBlogPosts,
 	getBlogPostById,
-	createBlogPost,
 	updateBlogPost,
 	deleteBlogPost,
 	database: db, 	// The actual database instance.
