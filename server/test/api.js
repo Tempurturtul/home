@@ -28,6 +28,87 @@ test.after.always(async () => {
 	await emptyDB();
 });
 
+// POST /api/v1/authenticate
+
+test('POST /api/v1/authenticate - success', async (t) => {
+	t.plan(3);
+
+	const res = await request(app)
+		.post('/api/v1/authenticate')
+		.send({ name: admin.name, password: admin.password });
+
+	t.is(res.status, 200);
+	t.is(res.body.status, 'success');
+	t.not(res.body.data, undefined);
+});
+
+test('POST /api/v1/authenticate - fail, wrong password', async (t) => {
+	t.plan(4);
+
+	const res = await request(app)
+		.post('/api/v1/authenticate')
+		.send({ name: admin.name, password: `${admin.password}123` });
+
+	t.is(res.status, 200);
+	t.is(res.body.status, 'fail');
+	t.is(res.body.data.name, undefined);
+	t.not(res.body.data.password, undefined);
+});
+
+test('POST /api/v1/authenticate - fail, no password', async (t) => {
+	t.plan(4);
+
+	const res = await request(app)
+		.post('/api/v1/authenticate')
+		.send({ name: admin.name, password: '' });
+
+	t.is(res.status, 200);
+	t.is(res.body.status, 'fail');
+	t.is(res.body.data.name, undefined);
+	t.not(res.body.data.password, undefined);
+});
+
+test('POST /api/v1/authenticate - fail, wrong name', async (t) => {
+	t.plan(4);
+
+	const res = await request(app)
+		.post('/api/v1/authenticate')
+		.send({ name: `${admin.name}123`, password: admin.password });
+
+	t.is(res.status, 200);
+	t.is(res.body.status, 'fail');
+	t.not(res.body.data.name, undefined);
+	t.is(res.body.data.password, undefined);
+});
+
+test('POST /api/v1/authenticate - fail, no name', async (t) => {
+	t.plan(4);
+
+	const res = await request(app)
+		.post('/api/v1/authenticate')
+		.send({ name: '', password: admin.password });
+
+	t.is(res.status, 200);
+	t.is(res.body.status, 'fail');
+	t.not(res.body.data.name, undefined);
+	t.is(res.body.data.password, undefined);
+});
+
+test('POST /api/v1/authenticate - fail, no name nor password', async (t) => {
+	t.plan(4);
+
+	const res = await request(app)
+		.post('/api/v1/authenticate')
+		.send({ name: '', password: '' });
+
+	t.is(res.status, 200);
+	t.is(res.body.status, 'fail');
+	t.not(res.body.data.name, undefined);
+	t.not(res.body.data.password, undefined);
+});
+
+// POST /api/v1/users
+
 test.skip('POST /api/v1/users - success', async (t) => {
 	t.plan(3);
 
@@ -131,128 +212,23 @@ test.skip('POST /api/v1/users - fail, invalid name and password', async (t) => {
 	t.not(res.body.data.password, undefined);
 });
 
-test('POST /api/v1/authenticate - success', async (t) => {
-	t.plan(3);
+// GET /api/v1/users
 
-	const res = await request(app)
-		.post('/api/v1/authenticate')
-		.send({ name: admin.name, password: admin.password });
+// TODO
 
-	t.is(res.status, 200);
-	t.is(res.body.status, 'success');
-	t.not(res.body.data, undefined);
-});
+// GET /api/v1/users/:name
 
-test('POST /api/v1/authenticate - fail, wrong password', async (t) => {
-	t.plan(4);
+// TODO
 
-	const res = await request(app)
-		.post('/api/v1/authenticate')
-		.send({ name: admin.name, password: `${admin.password}123` });
+// PUT /api/v1/users/:name
 
-	t.is(res.status, 200);
-	t.is(res.body.status, 'fail');
-	t.is(res.body.data.name, undefined);
-	t.not(res.body.data.password, undefined);
-});
+// TODO
 
-test('POST /api/v1/authenticate - fail, no password', async (t) => {
-	t.plan(4);
+// DELETE /api/v1/users/:name
 
-	const res = await request(app)
-		.post('/api/v1/authenticate')
-		.send({ name: admin.name, password: '' });
+// TODO
 
-	t.is(res.status, 200);
-	t.is(res.body.status, 'fail');
-	t.is(res.body.data.name, undefined);
-	t.not(res.body.data.password, undefined);
-});
-
-test('POST /api/v1/authenticate - fail, wrong name', async (t) => {
-	t.plan(4);
-
-	const res = await request(app)
-		.post('/api/v1/authenticate')
-		.send({ name: `${admin.name}123`, password: admin.password });
-
-	t.is(res.status, 200);
-	t.is(res.body.status, 'fail');
-	t.not(res.body.data.name, undefined);
-	t.is(res.body.data.password, undefined);
-});
-
-test('POST /api/v1/authenticate - fail, no name', async (t) => {
-	t.plan(4);
-
-	const res = await request(app)
-		.post('/api/v1/authenticate')
-		.send({ name: '', password: admin.password });
-
-	t.is(res.status, 200);
-	t.is(res.body.status, 'fail');
-	t.not(res.body.data.name, undefined);
-	t.is(res.body.data.password, undefined);
-});
-
-test('POST /api/v1/authenticate - fail, no name nor password', async (t) => {
-	t.plan(4);
-
-	const res = await request(app)
-		.post('/api/v1/authenticate')
-		.send({ name: '', password: '' });
-
-	t.is(res.status, 200);
-	t.is(res.body.status, 'fail');
-	t.not(res.body.data.name, undefined);
-	t.not(res.body.data.password, undefined);
-});
-
-test('GET /api/v1/blog-posts - success', async (t) => {
-	t.plan(3);
-
-	const res = await request(app)
-		.get('/api/v1/blog-posts');
-
-	t.is(res.status, 200);
-	t.is(res.body.status, 'success');
-	t.not(res.body.data, undefined);
-});
-
-test('GET /api/v1/blog-posts/:id - success', async (t) => {
-	t.plan(3);
-
-	const id = await getNextBlogPostID(app);
-
-	const res = await request(app)
-		.get(`/api/v1/blog-posts/${id}`);
-
-	t.is(res.status, 200);
-	t.is(res.body.status, 'success');
-	t.not(res.body.data, undefined);
-});
-
-test('GET /api/v1/blog-posts/:id - fail, wrong id', async (t) => {
-	t.plan(3);
-
-	const res = await request(app)
-		.get('/api/v1/blog-posts/12300');
-
-	t.is(res.status, 200);
-	t.is(res.body.status, 'fail');
-	t.not(res.body.data.id, undefined);
-});
-
-test('GET /api/v1/blog-posts/:id - fail, invalid id', async (t) => {
-	t.plan(3);
-
-	const res = await request(app)
-		.get('/api/v1/blog-posts/abc');
-
-	t.is(res.status, 200);
-	t.is(res.body.status, 'fail');
-	t.not(res.body.data.id, undefined);
-});
+// POST /api/v1/blog-posts
 
 test('POST /api/v1/blog-posts - success, full', async (t) => {
 	t.plan(5);
@@ -388,6 +364,58 @@ test('POST /api/v1/blog-posts - fail, not admin', async (t) => {
 	t.is(res.body.data.title, undefined);
 	t.not(res.body.data.admin, undefined);
 });
+
+// GET /api/v1/blog-posts
+
+test('GET /api/v1/blog-posts - success', async (t) => {
+	t.plan(3);
+
+	const res = await request(app)
+		.get('/api/v1/blog-posts');
+
+	t.is(res.status, 200);
+	t.is(res.body.status, 'success');
+	t.not(res.body.data, undefined);
+});
+
+// GET /api/v1/blog-posts/:id
+
+test('GET /api/v1/blog-posts/:id - success', async (t) => {
+	t.plan(3);
+
+	const id = await getNextBlogPostID(app);
+
+	const res = await request(app)
+		.get(`/api/v1/blog-posts/${id}`);
+
+	t.is(res.status, 200);
+	t.is(res.body.status, 'success');
+	t.not(res.body.data, undefined);
+});
+
+test('GET /api/v1/blog-posts/:id - fail, wrong id', async (t) => {
+	t.plan(3);
+
+	const res = await request(app)
+		.get('/api/v1/blog-posts/12300');
+
+	t.is(res.status, 200);
+	t.is(res.body.status, 'fail');
+	t.not(res.body.data.id, undefined);
+});
+
+test('GET /api/v1/blog-posts/:id - fail, invalid id', async (t) => {
+	t.plan(3);
+
+	const res = await request(app)
+		.get('/api/v1/blog-posts/abc');
+
+	t.is(res.status, 200);
+	t.is(res.body.status, 'fail');
+	t.not(res.body.data.id, undefined);
+});
+
+// PUT /api/v1/blog-posts/:id
 
 test('PUT /api/v1/blog-posts/:id - success, full', async (t) => {
 	t.plan(4);
@@ -551,6 +579,8 @@ test('PUT /api/v1/blog-posts/:id - fail, not admin', async (t) => {
 	t.is(res.body.data.title, undefined);
 	t.not(res.body.data.admin, undefined);
 });
+
+// DELETE /api/v1/blog-posts/:id
 
 test('DELETE /api/v1/blog-posts/:id - success', async (t) => {
 	t.plan(3);
