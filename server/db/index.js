@@ -3,6 +3,8 @@
 const pgp = require('pg-promise')();
 const jwt = require('jsonwebtoken');
 const config = require('../config');
+const validUserName = require('../helpers/valid-user-name');
+const validUserPassword = require('../helpers/valid-user-password');
 
 const db = pgp(config.database);
 
@@ -72,6 +74,71 @@ function authenticate(req, res) {
 				res.json({
 					status: 'error',
 					message: 'Error logging in.',
+					data: err,
+				});
+			});
+	}
+}
+
+/**
+ * Provides the result of inserting a user in the data portion of the JSON
+ * response if the user is successfully inserted. JSend-compliant.
+ * @param {object} req - Express.js Request object.
+ * @param {object} req.body - Data submitted in the request body.
+ * @param {string} [req.body.name] - The user name.
+ * @param {string[]} [req.body.password] - The user password.
+ * @param {object} res - Express.js Response object.
+ */
+function createUser(req, res) {
+	const { name, password } = req.body;
+
+	if (!name || !password) {
+		const data = {};
+
+		if (!name) {
+			data.name = 'A name is required.';
+		}
+
+		if (!password) {
+			data.password = 'A pasword is required.';
+		}
+
+		res.json({
+			status: 'fail',
+			data,
+		});
+	} else if (!validUserName(name) || !validUserPassword(password)) {
+		const data = {};
+
+		if (!validUserName(name)) {
+			data.name = 'Invalid name, check requirements.';
+		}
+
+		if (!validUserPassword(password)) {
+			data.password = 'Invalid password, check requirements.';
+		}
+
+		res.json({
+			status: 'fail',
+			data,
+		});
+	} else {
+		const queryStr = 'INSERT INTO ' +
+			'users(name, password, admin) ' +
+			'VALUES($1, $2, false) ' +
+			'RETURNING name';
+
+		db.one(queryStr, [name, password])
+			.then((data) => {
+				res.json({
+					status: 'success',
+					data,
+				});
+			})
+			.catch((err) => {
+				res.json({
+					status: 'error',
+					message: 'Error creating user.',
 					data: err,
 				});
 			});
@@ -311,6 +378,7 @@ function deleteBlogPost(req, res) {
 
 module.exports = {
 	authenticate,
+	createUser,
 	createBlogPost,
 	getBlogPosts,
 	getBlogPostById,

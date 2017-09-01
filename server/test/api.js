@@ -109,7 +109,7 @@ test('POST /api/v1/authenticate - fail, no name nor password', async (t) => {
 
 // POST /api/v1/users
 
-test.skip('POST /api/v1/users - success', async (t) => {
+test('POST /api/v1/users - success', async (t) => {
 	t.plan(3);
 
 	const res = await request(app)
@@ -134,7 +134,7 @@ test.skip('POST /api/v1/users - fail, name exists', async (t) => {
 	t.is(res.body.data.password, undefined);
 });
 
-test.skip('POST /api/v1/users - fail, invalid name', async (t) => {
+test('POST /api/v1/users - fail, invalid name', async (t) => {
 	t.plan(4);
 
 	const res = await request(app)
@@ -147,7 +147,7 @@ test.skip('POST /api/v1/users - fail, invalid name', async (t) => {
 	t.is(res.body.data.password, undefined);
 });
 
-test.skip('POST /api/v1/users - fail, no name', async (t) => {
+test('POST /api/v1/users - fail, no name', async (t) => {
 	t.plan(4);
 
 	const res = await request(app)
@@ -160,7 +160,7 @@ test.skip('POST /api/v1/users - fail, no name', async (t) => {
 	t.is(res.body.data.password, undefined);
 });
 
-test.skip('POST /api/v1/users - fail, invalid password', async (t) => {
+test('POST /api/v1/users - fail, invalid password', async (t) => {
 	t.plan(4);
 
 	const res = await request(app)
@@ -173,7 +173,7 @@ test.skip('POST /api/v1/users - fail, invalid password', async (t) => {
 	t.not(res.body.data.password, undefined);
 });
 
-test.skip('POST /api/v1/users - fail, no password', async (t) => {
+test('POST /api/v1/users - fail, no password', async (t) => {
 	t.plan(4);
 
 	const res = await request(app)
@@ -186,7 +186,7 @@ test.skip('POST /api/v1/users - fail, no password', async (t) => {
 	t.not(res.body.data.password, undefined);
 });
 
-test.skip('POST /api/v1/users - fail, no name nor password', async (t) => {
+test('POST /api/v1/users - fail, no name nor password', async (t) => {
 	t.plan(4);
 
 	const res = await request(app)
@@ -199,7 +199,7 @@ test.skip('POST /api/v1/users - fail, no name nor password', async (t) => {
 	t.not(res.body.data.password, undefined);
 });
 
-test.skip('POST /api/v1/users - fail, invalid name and password', async (t) => {
+test('POST /api/v1/users - fail, invalid name and password', async (t) => {
 	t.plan(4);
 
 	const res = await request(app)

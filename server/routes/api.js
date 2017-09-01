@@ -7,6 +7,7 @@ const verifyAdmin = require('../helpers/middleware/verify-admin');
 
 // Unprotected routes.
 router.post('/authenticate', db.authenticate);
+router.post('/users', db.createUser);
 router.get('/blog-posts', db.getBlogPosts);
 router.get('/blog-posts/:id', db.getBlogPostById);
 
