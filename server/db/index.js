@@ -136,11 +136,21 @@ function createUser(req, res) {
 				});
 			})
 			.catch((err) => {
-				res.json({
-					status: 'error',
-					message: 'Error creating user.',
-					data: err,
-				});
+				if (Number(err.code) === 23505) {
+					// Name already exists. (23505 unique_violation)
+					res.json({
+						status: 'fail',
+						data: {
+							name: 'Name already exists.',
+						},
+					});
+				} else {
+					res.json({
+						status: 'error',
+						message: 'Error creating user.',
+						data: err,
+					});
+				}
 			});
 	}
 }

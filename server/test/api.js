@@ -121,7 +121,7 @@ test('POST /api/v1/users - success', async (t) => {
 	t.not(res.body.data, undefined);
 });
 
-test.skip('POST /api/v1/users - fail, name exists', async (t) => {
+test('POST /api/v1/users - fail, name exists', async (t) => {
 	t.plan(4);
 
 	const res = await request(app)
