@@ -7,6 +7,7 @@ test('validates user names', (t) => {
 		'Maximum Overdrive the 5th',
 		'abc',
 		'123',
+		(new Array(32 + 1)).join('a'),
 	];
 
 	const invalidNames = [
@@ -19,6 +20,7 @@ test('validates user names', (t) => {
 		'Barry Boron ',
 		'Barry*Boron',
 		'Barry_Boron',
+		(new Array(32 + 2)).join('a'),
 	];
 
 	t.plan(validNames.length + invalidNames.length);

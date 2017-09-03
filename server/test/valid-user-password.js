@@ -8,6 +8,7 @@ test('validates user passwords', (t) => {
 		'piece of cake',
 		'EXx__trem,45w354 04364gsz/>    DFGH-*/4235+',
 		'onlysmall',
+		(new Array(256 + 1)).join('a'),
 	];
 
 	const invalidPasswords = [
@@ -16,6 +17,7 @@ test('validates user passwords', (t) => {
 		'1',
 		' pieceofcake',
 		'pieceofcake ',
+		(new Array(256 + 2)).join('a'),
 	];
 
 	t.plan(validPasswords.length + invalidPasswords.length);

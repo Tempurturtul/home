@@ -4,8 +4,8 @@
  * @return {bool} - Whether or not the user password is valid.
  */
 function validUserPassword(password) {
-	// 8+ characters.
-	const validLength = password.length >= 8;
+	// 8-256 characters.
+	const validLength = password.length >= 8 && password.length <= 256;
 	// No leading or trailing whitespace.
 	const validStart = /[^\s]/.test(password[0]);
 	const validEnd = /[^\s]/.test(password[password.length - 1]);

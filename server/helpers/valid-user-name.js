@@ -4,8 +4,8 @@
  * @return {bool} - Whether or not the user name is valid.
  */
 function validUserName(name) {
-	// 3+ characters.
-	const validLength = name.length >= 3;
+	// 3-32 characters.
+	const validLength = name.length >= 3 && name.length <= 32;
 	// Letters, digits, and whitespace only.
 	const validChars = /^[a-zA-Z0-9\s]+$/.test(name);
 	// No leading or trailing whitespace.
