@@ -1,5 +1,6 @@
 import db from '../../db';
 import testData from './test-data.json';
+import hashPassword from '../../helpers/hash-password';
 
 async function populateDB() {
 	const admin = testData.users.admin;
@@ -9,15 +10,22 @@ async function populateDB() {
 
 	const promises = [];
 
-	await db.database.any('INSERT INTO users (name, password, admin) VALUES ($1, $2, $3)', [
+	const salt = 'this is salt';
+	const iterations = 1000;
+
+	await db.database.any('INSERT INTO users (name, password.hash, password.salt, password.iterations, admin) VALUES ($1, $2, $3, $4, $5)', [
 		admin.name,
-		admin.password,
+		hashPassword(admin.password, salt, iterations),
+		salt,
+		iterations,
 		true,
 	]);
 
-	await db.database.any('INSERT INTO users (name, password, admin) VALUES ($1, $2, $3)', [
+	await db.database.any('INSERT INTO users (name, password.hash, password.salt, password.iterations, admin) VALUES ($1, $2, $3, $4, $5)', [
 		user.name,
-		user.password,
+		hashPassword(user.password, salt, iterations),
+		salt,
+		iterations,
 		false,
 	]);
 

@@ -1,10 +1,13 @@
 // Responses are JSend-compliant JSON. (http://labs.omniti.com/labs/jsend)
 
+const crypto = require('crypto');
 const pgp = require('pg-promise')();
 const jwt = require('jsonwebtoken');
 const config = require('../config');
 const validUserName = require('../helpers/valid-user-name');
 const validUserPassword = require('../helpers/valid-user-password');
+const hashPassword = require('../helpers/hash-password');
+const parsePasswordFromDB = require('../helpers/parse-password-from-db');
 
 const db = pgp(config.database);
 
@@ -49,8 +52,13 @@ function authenticate(req, res) {
 				} else {
 					const user = data;
 
+					// Convert data from format `'(hash,"salt",iterations)'` to `{hash, salt, iterations}`.
+					user.password = parsePasswordFromDB(user.password);
+
+					const hash = hashPassword(password, user.password.salt, user.password.iterations);
+
 					// Check password.
-					if (user.password !== password) {
+					if (user.password.hash !== hash) {
 						res.json({
 							status: 'fail',
 							data: {
@@ -123,12 +131,21 @@ function createUser(req, res) {
 			data,
 		});
 	} else {
+		// The number of hash iterations to perform. (40,000 recommended as of August 2017.)
+		const iterations = 40000;
+		// Get strong random salt. (16+ bytes recommended, 32 used.)
+		const salt = crypto.randomBytes(32).toString('hex');
+		// Number of bytes of output to take as the final hash.
+		const outputBytes = 32;
+		// Hash the password.
+		const hash = hashPassword(password, salt, iterations, outputBytes);
+
 		const queryStr = 'INSERT INTO ' +
-			'users(name, password, admin) ' +
-			'VALUES($1, $2, false) ' +
+			'users(name, password.hash, password.salt, password.iterations, admin) ' +
+			'VALUES($1, $2, $3, $4, false) ' +
 			'RETURNING name';
 
-		db.one(queryStr, [name, password])
+		db.one(queryStr, [name, hash, salt, iterations])
 			.then((data) => {
 				res.json({
 					status: 'success',

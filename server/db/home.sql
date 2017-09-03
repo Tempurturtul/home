@@ -3,6 +3,12 @@ CREATE DATABASE home;
 
 \c home;
 
+CREATE TYPE password AS (
+	hash VARCHAR,
+	salt VARCHAR,
+	iterations INTEGER
+);
+
 CREATE TABLE blogPosts (
 	id SERIAL PRIMARY KEY,
 	title VARCHAR NOT NULL,
@@ -15,6 +21,6 @@ CREATE TABLE blogPosts (
 
 CREATE TABLE users (
 	name VARCHAR PRIMARY KEY,
-	password VARCHAR NOT NULL,
+	password PASSWORD NOT NULL,
 	admin BOOLEAN
 );
