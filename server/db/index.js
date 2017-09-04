@@ -176,93 +176,15 @@ function createUser(req, res) {
  * Provides an array of all users in the data portion of the JSON response if
  * the request is successful. JSend-compliant.
  * @param {object} req - Express.js Request object.
+ * @param {object} req.decoded - The decoded JSON Web Token payload, provided
+ * automatically by middleware.
+ * @param {bool} req.decoded.admin - The user's admin status according to the
+ * token.
  * @param {object} res - Express.js Response object.
  */
 function getUsers(req, res) {
-	db.any('SELECT name, admin FROM users')
-		.then((data) => {
-			res.json({
-				status: 'success',
-				data,
-			});
-		})
-		.catch((err) => {
-			res.json({
-				status: 'error',
-				message: 'Error retrieving users.',
-				data: err,
-			});
-		});
-}
-
-/**
- * Provides the user matching the name in the data portion of the JSON response
- * if the name matches any user. JSend-compliant.
- * @param {object} req - Express.js Request object.
- * @param {object} req.params - Data submitted as route parameters.
- * @param {string|number} req.params.name - The user name.
- * @param {object} res - Express.js Response object.
- */
-function getUserByName(req, res) {
-	const name = req.params.name;
-
-	db.oneOrNone('SELECT name, admin FROM users WHERE name=$1', [name])
-		.then((data) => {
-			if (!data) {
-				res.json({
-					status: 'fail',
-					data: {
-						name: 'No user with that name exists.',
-					},
-				});
-			} else {
-				res.json({
-					status: 'success',
-					data,
-				});
-			}
-		})
-		.catch((err) => {
-			res.json({
-				status: 'error',
-				message: 'Error retrieving user.',
-				data: err,
-			});
-		});
-}
-
-/**
- * Provides the result of inserting a blog post in the data portion of the JSON
- * response if the blog post is successfully inserted. JSend-compliant.
- * @param {object} req - Express.js Request object.
- * @param {object} req.decoded - Decoded JSON web token payload, automatically
- * provided by middleware.
- * @param {bool} req.decoded.name - User's name.
- * @param {object} req.body - Data submitted in the request body.
- * @param {string} [req.body.title] - The blog post title.
- * @param {string[]} [req.body.tags] - The blog post tags.
- * @param {string} [req.body.body] - The blog post body.
- * @param {object} res - Express.js Response object.
- */
-function createBlogPost(req, res) {
-	const { title, tags, body } = req.body;
-	const author = req.decoded.name;
-	const created = new Date().toISOString();
-
-	if (!title) {
-		res.json({
-			status: 'fail',
-			data: {
-				title: 'A title is required.',
-			},
-		});
-	} else {
-		const queryStr = 'INSERT INTO ' +
-			'blogPosts(title, author, created, tags, body) ' +
-			'VALUES($1, $2, $3, $4, $5) ' +
-			'RETURNING id';
-
-		db.one(queryStr, [title, author, created, tags, body])
+	if (req.decoded.admin) {
+		db.any('SELECT name, admin FROM users')
 			.then((data) => {
 				res.json({
 					status: 'success',
@@ -272,10 +194,129 @@ function createBlogPost(req, res) {
 			.catch((err) => {
 				res.json({
 					status: 'error',
-					message: 'Error creating blog post.',
+					message: 'Error retrieving users.',
 					data: err,
 				});
 			});
+	} else {
+		// Not admin, access denied. (403 Forbidden)
+		res.status(403).json({
+			status: 'fail',
+			data: {
+				admin: 'You must be an admin to perform this action.',
+			},
+		});
+	}
+}
+
+/**
+ * Provides the user matching the name in the data portion of the JSON response
+ * if the name matches any user. JSend-compliant.
+ * @param {object} req - Express.js Request object.
+ * @param {object} req.decoded - The decoded JSON Web Token payload, provided
+ * automatically by middleware.
+ * @param {string} req.decoded.name - The user's name according to the token.
+ * @param {bool} req.decoded.admin - The user's admin status according to the
+ * token.
+ * @param {object} req.params - Data submitted as route parameters.
+ * @param {string|number} req.params.name - The user name.
+ * @param {object} res - Express.js Response object.
+ */
+function getUserByName(req, res) {
+	const name = req.params.name;
+
+	if (req.decoded.admin || req.decoded.name === name) {
+		db.oneOrNone('SELECT name, admin FROM users WHERE name=$1', [name])
+			.then((data) => {
+				if (!data) {
+					res.json({
+						status: 'fail',
+						data: {
+							name: 'No user with that name exists.',
+						},
+					});
+				} else {
+					res.json({
+						status: 'success',
+						data,
+					});
+				}
+			})
+			.catch((err) => {
+				res.json({
+					status: 'error',
+					message: 'Error retrieving user.',
+					data: err,
+				});
+			});
+	} else {
+		// Not admin nor target user, access denied. (403 Forbidden)
+		res.status(403).json({
+			status: 'fail',
+			data: {
+				admin: 'You must be an admin (or the target user) to perform this action.',
+			},
+		});
+	}
+}
+
+/**
+ * Provides the result of inserting a blog post in the data portion of the JSON
+ * response if the blog post is successfully inserted. JSend-compliant.
+ * @param {object} req - Express.js Request object.
+ * @param {object} req.decoded - The decoded JSON Web Token payload, provided
+ * automatically by middleware.
+ * @param {string} req.decoded.name - The user's name according to the token.
+ * @param {bool} req.decoded.admin - The user's admin status according to the
+ * token.
+ * @param {object} req.body - Data submitted in the request body.
+ * @param {string} [req.body.title] - The blog post title.
+ * @param {string[]} [req.body.tags] - The blog post tags.
+ * @param {string} [req.body.body] - The blog post body.
+ * @param {object} res - Express.js Response object.
+ */
+function createBlogPost(req, res) {
+	if (req.decoded.admin) {
+		const { title, tags, body } = req.body;
+		const author = req.decoded.name;
+		const created = new Date().toISOString();
+
+		if (!title) {
+			res.json({
+				status: 'fail',
+				data: {
+					title: 'A title is required.',
+				},
+			});
+		} else {
+			const queryStr = 'INSERT INTO ' +
+				'blogPosts(title, author, created, tags, body) ' +
+				'VALUES($1, $2, $3, $4, $5) ' +
+				'RETURNING id';
+
+			db.one(queryStr, [title, author, created, tags, body])
+				.then((data) => {
+					res.json({
+						status: 'success',
+						data,
+					});
+				})
+				.catch((err) => {
+					res.json({
+						status: 'error',
+						message: 'Error creating blog post.',
+						data: err,
+					});
+				});
+		}
+	} else {
+		// Not admin, access denied. (403 Forbidden)
+		res.status(403).json({
+			status: 'fail',
+			data: {
+				admin: 'You must be an admin to perform this action.',
+			},
+		});
 	}
 }
 
@@ -307,8 +348,8 @@ function getBlogPosts(req, res) {
  * response if the ID matches any blog post. JSend-compliant.
  * @param {object} req - Express.js Request object.
  * @param {object} req.params - Data submitted as route parameters.
- * @param {string|number} req.params.id - The blog post ID. Must be an integer or
- * string representation of an integer.
+ * @param {string|number} req.params.id - The blog post ID. Must be an integer
+ * or string representation of an integer.
  * @param {object} res - Express.js Response object.
  */
 function getBlogPostById(req, res) {
@@ -352,12 +393,14 @@ function getBlogPostById(req, res) {
  * Provides the result of updating a blog post in the data portion of the JSON
  * response if the blog post is successfully updated. JSend-compliant.
  * @param {object} req - Express.js Request object.
- * @param {object} req.decoded - Decoded JSON web token payload, automatically
- * provided by middleware.
- * @param {bool} req.decoded.name - User's name.
+ * @param {object} req.decoded - The decoded JSON Web Token payload, provided
+ * automatically by middleware.
+ * @param {string} req.decoded.name - The user's name according to the token.
+ * @param {bool} req.decoded.admin - The user's admin status according to the
+ * token.
  * @param {object} req.params - Data submitted as route parameters.
- * @param {string|number} req.params.id - The blog post ID. Must be an integer or
- * string representation of an integer.
+ * @param {string|number} req.params.id - The blog post ID. Must be an integer
+ * or string representation of an integer.
  * @param {object} req.body - Data submitted in the request body.
  * @param {string} [req.body.title] - The blog post title.
  * @param {string[]} [req.body.tags] - The blog post tags.
@@ -365,47 +408,57 @@ function getBlogPostById(req, res) {
  * @param {object} res - Express.js Response object.
  */
 function updateBlogPost(req, res) {
-	const id = Number(req.params.id);
+	if (req.decoded.admin) {
+		const id = Number(req.params.id);
 
-	if (!Number.isInteger(id)) {
-		res.json({
+		if (!Number.isInteger(id)) {
+			res.json({
+				status: 'fail',
+				data: {
+					id: 'An integer id is required.',
+				},
+			});
+		} else {
+			const { title, tags, body } = req.body;
+			const modified = new Date().toISOString();
+
+			const queryStr = 'UPDATE blogPosts ' +
+				'SET title = $2, modified = $3, tags = $4, body = $5 ' +
+				'WHERE id = $1 ' +
+				'RETURNING id';
+
+			db.oneOrNone(queryStr, [id, title, modified, tags, body])
+				.then((data) => {
+					if (!data) {
+						res.json({
+							status: 'fail',
+							data: {
+								id: 'No blog post with that ID exists.',
+							},
+						});
+					} else {
+						res.json({
+							status: 'success',
+							data,
+						});
+					}
+				})
+				.catch((err) => {
+					res.json({
+						status: 'error',
+						message: 'Error updating blog post.',
+						data: err,
+					});
+				});
+		}
+	} else {
+		// Not admin, access denied. (403 Forbidden)
+		res.status(403).json({
 			status: 'fail',
 			data: {
-				id: 'An integer id is required.',
+				admin: 'You must be an admin to perform this action.',
 			},
 		});
-	} else {
-		const { title, tags, body } = req.body;
-		const modified = new Date().toISOString();
-
-		const queryStr = 'UPDATE blogPosts ' +
-			'SET title = $2, modified = $3, tags = $4, body = $5 ' +
-			'WHERE id = $1 ' +
-			'RETURNING id';
-
-		db.oneOrNone(queryStr, [id, title, modified, tags, body])
-			.then((data) => {
-				if (!data) {
-					res.json({
-						status: 'fail',
-						data: {
-							id: 'No blog post with that ID exists.',
-						},
-					});
-				} else {
-					res.json({
-						status: 'success',
-						data,
-					});
-				}
-			})
-			.catch((err) => {
-				res.json({
-					status: 'error',
-					message: 'Error updating blog post.',
-					data: err,
-				});
-			});
 	}
 }
 
@@ -413,52 +466,64 @@ function updateBlogPost(req, res) {
  * Provides the result of deleting a blog post in the data portion of the JSON
  * response if the blog post is successfully deleted. JSend-compliant.
  * @param {object} req - Express.js Request object.
- * @param {object} req.decoded - Decoded JSON web token payload, automatically
- * provided by middleware.
- * @param {bool} req.decoded.name - User's name.
+ * @param {object} req.decoded - The decoded JSON Web Token payload, provided
+ * automatically by middleware.
+ * @param {string} req.decoded.name - The user's name according to the token.
+ * @param {bool} req.decoded.admin - The user's admin status according to the
+ * token.
  * @param {object} req.params - Data submitted as route parameters.
- * @param {string|number} req.params.id - The blog post ID. Must be an integer or
- * string representation of an integer.
+ * @param {string|number} req.params.id - The blog post ID. Must be an integer
+ * or string representation of an integer.
  * @param {object} res - Express.js Response object.
  */
 function deleteBlogPost(req, res) {
-	const id = Number(req.params.id);
+	if (req.decoded.admin) {
+		const id = Number(req.params.id);
 
-	if (!Number.isInteger(id)) {
-		res.json({
+		if (!Number.isInteger(id)) {
+			res.json({
+				status: 'fail',
+				data: {
+					id: 'An integer id is required.',
+				},
+			});
+		} else {
+			const queryStr = 'DELETE FROM blogPosts ' +
+				'WHERE id = $1 ' +
+				'RETURNING id';
+
+			db.oneOrNone(queryStr, [id])
+				.then((data) => {
+					if (!data) {
+						res.json({
+							status: 'fail',
+							data: {
+								id: 'No blog post with that ID exists.',
+							},
+						});
+					} else {
+						res.json({
+							status: 'success',
+							data,
+						});
+					}
+				})
+				.catch((err) => {
+					res.json({
+						status: 'error',
+						message: 'Error deleting blog post.',
+						data: err,
+					});
+				});
+		}
+	} else {
+		// Not admin, access denied. (403 Forbidden)
+		res.status(403).json({
 			status: 'fail',
 			data: {
-				id: 'An integer id is required.',
+				admin: 'You must be an admin to perform this action.',
 			},
 		});
-	} else {
-		const queryStr = 'DELETE FROM blogPosts ' +
-			'WHERE id = $1 ' +
-			'RETURNING id';
-
-		db.oneOrNone(queryStr, [id])
-			.then((data) => {
-				if (!data) {
-					res.json({
-						status: 'fail',
-						data: {
-							id: 'No blog post with that ID exists.',
-						},
-					});
-				} else {
-					res.json({
-						status: 'success',
-						data,
-					});
-				}
-			})
-			.catch((err) => {
-				res.json({
-					status: 'error',
-					message: 'Error deleting blog post.',
-					data: err,
-				});
-			});
 	}
 }
 

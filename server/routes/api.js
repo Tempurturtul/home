@@ -3,20 +3,15 @@
 const router = require('express').Router();
 const db = require('../db');
 const verifyJWT = require('../helpers/middleware/verify-jwt');
-const verifyAdmin = require('../helpers/middleware/verify-admin');
 
-// Unprotected routes.
 router.post('/authenticate', db.authenticate);
 router.post('/users', db.createUser);
 router.get('/blog-posts', db.getBlogPosts);
 router.get('/blog-posts/:id', db.getBlogPostById);
 
-// Route middleware to verify tokens.
+// Route middleware to require and verify tokens.
 router.use(verifyJWT);
-// Route middleware to verify admin.
-router.use(verifyAdmin);
 
-// Admin-only routes.
 router.get('/users', db.getUsers);
 router.get('/users/:name', db.getUserByName);
 router.post('/blog-posts', db.createBlogPost);

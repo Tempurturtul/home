@@ -259,15 +259,30 @@ test('GET /api/v1/users - fail, not admin', async (t) => {
 
 // GET /api/v1/users/:name
 
-test('GET /api/v1/users/:name - success', async (t) => {
+test('GET /api/v1/users/:name - success, admin', async (t) => {
 	t.plan(4);
 
 	const token = await getToken(app, admin.name, admin.password);
 
-	const name = user.name;
+	const someUser = await getNextUser(app);
 
 	const res = await request(app)
-		.get(`/api/v1/users/${name}`)
+		.get(`/api/v1/users/${someUser.name}`)
+		.send({ token });
+
+	t.is(res.status, 200);
+	t.is(res.body.status, 'success');
+	t.is(res.body.data.name, someUser.name);
+	t.is(res.body.data.admin, someUser.admin);
+});
+
+test('GET /api/v1/users/:name - success, self', async (t) => {
+	t.plan(4);
+
+	const token = await getToken(app, user.name, user.password);
+
+	const res = await request(app)
+		.get(`/api/v1/users/${user.name}`)
 		.send({ token });
 
 	t.is(res.status, 200);
@@ -306,15 +321,20 @@ test('GET /api/v1/users/:name - fail, no token', async (t) => {
 	t.is(res.body.data.admin, undefined);
 });
 
-test('GET /api/v1/users/:name - fail, not admin', async (t) => {
+test('GET /api/v1/users/:name - fail, not admin nor self', async (t) => {
 	t.plan(4);
 
 	const token = await getToken(app, user.name, user.password);
 
-	const name = user.name;
+	let someUser = await getNextUser(app);
+
+	// Make sure someUser is not the user the token belongs to.
+	if (someUser.name === user.name) {
+		someUser = await getNextUser(app);
+	}
 
 	const res = await request(app)
-		.get(`/api/v1/users/${name}`)
+		.get(`/api/v1/users/${someUser.name}`)
 		.send({ token });
 
 	t.is(res.status, 403);
@@ -351,23 +371,115 @@ test.skip('PUT /api/v1/users/:name - success, full', async (t) => {
 		});
 
 	// Retrieve the newly modified user.
-	const retrievedUser = await getUser(app, res.body.data.name);
+	const retrievedUser = await getUser(app, res.body.data);
 
 	t.is(res.status, 200);
 	t.is(res.body.status, 'success');
-	t.not(res.body.data, undefined);
 	t.deepEqual({
 		name: modifiedUser.name,
 		admin: modifiedUser.admin,
 	}, retrievedUser);
 
 	// Test the new password.
-	try {
-		const modifiedUserToken = await getToken(app, modifiedUser.name, modifiedUser.password);
-		t.not(modifiedUserToken, undefined);
-	} catch (e) {
-		t.fail();
-	}
+	const authRes = await request(app)
+		.post('/api/v1/authenticate')
+		.send({
+			name: modifiedUser.name,
+			password: modifiedUser.password,
+		});
+	t.is(authRes.body.status, 'success');
+	t.not(authRes.body.data, undefined);
+});
+
+test.skip('PUT /api/v1/users/:name - success, no changes', async (t) => {
+	t.plan(5);
+
+	// Get an admin token.
+	const token = await getToken(app, admin.name, admin.password);
+
+	// Get a user to modify.
+	const originalUser = await getNextUser(app);
+
+	const res = await request(app)
+		.put(`/api/v1/users/${originalUser.name}`)
+		.send({
+			token,
+			name: originalUser.name,
+			admin: originalUser.admin,
+		});
+
+	// Retrieve the newly modified user.
+	const retrievedUser = await getUser(app, res.body.data);
+
+	t.is(res.status, 200);
+	t.is(res.body.status, 'success');
+	t.deepEqual({
+		name: originalUser.name,
+		admin: originalUser.admin,
+	}, retrievedUser);
+
+	// TODO Check password.
+});
+
+test.skip('PUT /api/v1/users/:name - fail, wrong name', async (t) => {
+	t.plan(3);
+
+	// Get an admin token.
+	const token = await getToken(app, admin.name, admin.password);
+
+	const res = await request(app)
+		.put('/api/v1/users/poppyloppysnopcakes')
+		.send({
+			token,
+			name: 'aname123',
+			admin: false,
+		});
+
+	t.is(res.status, 200);
+	t.is(res.body.status, 'fail');
+	t.not(res.body.data.name, undefined);
+});
+
+test.skip('PUT /api/v1/users/:name - fail, no token', async (t) => {
+	t.plan(4);
+
+	// Get a user to modify.
+	const originalUser = await getNextUser(app);
+
+	const res = await request(app)
+		.put(`/api/v1/users/${originalUser.name}`)
+		.send({
+			name: originalUser.name,
+			admin: originalUser.admin,
+		});
+
+	t.is(res.status, 403);
+	t.is(res.body.status, 'fail');
+	t.not(res.body.data.token, undefined);
+	t.is(res.body.data.admin, undefined);
+});
+
+test.skip('PUT /api/v1/users/:name - fail, not admin', async (t) => {
+	t.plan(4);
+
+	// Get a non-admin token.
+	const token = await getToken(app, user.name, user.password);
+
+	// Get a user to modify.
+	const originalUser = await getNextUser(app);
+
+	const res = await request(app)
+		.put(`/api/v1/users/${originalUser.name}`)
+		.send({
+			token,
+			name: originalUser.name,
+			admin: originalUser.admin,
+		});
+
+	t.is(res.status, 403);
+	t.is(res.body.status, 'fail');
+	t.is(res.body.data.token, undefined);
+	t.not(res.body.data.admin, undefined);
 });
 
 // DELETE /api/v1/users/:name
