@@ -4,8 +4,10 @@ import emptyDB from './helpers/empty-db';
 import populateDB from './helpers/populate-db';
 import makeApp from './helpers/make-app';
 import getToken from './helpers/get-token';
-import getNextBlogPostID from './helpers/get-next-blog-post-id';
+import getNextBlogPost from './helpers/get-next-blog-post';
 import getBlogPost from './helpers/get-blog-post';
+import getNextUser from './helpers/get-next-user';
+import getUser from './helpers/get-user';
 import testData from './helpers/test-data.json';
 
 const admin = testData.users.admin;
@@ -323,7 +325,50 @@ test('GET /api/v1/users/:name - fail, not admin', async (t) => {
 
 // PUT /api/v1/users/:name
 
-// TODO
+test.skip('PUT /api/v1/users/:name - success, full', async (t) => {
+	t.plan(5);
+
+	// Get an admin token.
+	const token = await getToken(app, admin.name, admin.password);
+
+	// Get a user to modify.
+	const originalUser = await getNextUser(app);
+
+	// Define new user data.
+	const modifiedUser = {
+		name: `${originalUser.name} modified`,
+		password: 'new password 123',
+		admin: true,
+	};
+
+	const res = await request(app)
+		.put(`/api/v1/users/${originalUser.name}`)
+		.send({
+			token,
+			name: modifiedUser.name,
+			password: modifiedUser.password,
+			admin: modifiedUser.admin,
+		});
+
+	// Retrieve the newly modified user.
+	const retrievedUser = await getUser(app, res.body.data.name);
+
+	t.is(res.status, 200);
+	t.is(res.body.status, 'success');
+	t.not(res.body.data, undefined);
+	t.deepEqual({
+		name: modifiedUser.name,
+		admin: modifiedUser.admin,
+	}, retrievedUser);
+
+	// Test the new password.
+	try {
+		const modifiedUserToken = await getToken(app, modifiedUser.name, modifiedUser.password);
+		t.not(modifiedUserToken, undefined);
+	} catch (e) {
+		t.fail();
+	}
+});
 
 // DELETE /api/v1/users/:name
 
@@ -484,10 +529,10 @@ test('GET /api/v1/blog-posts - success', async (t) => {
 test('GET /api/v1/blog-posts/:id - success', async (t) => {
 	t.plan(3);
 
-	const id = await getNextBlogPostID(app);
+	const blogPost = await getNextBlogPost(app);
 
 	const res = await request(app)
-		.get(`/api/v1/blog-posts/${id}`);
+		.get(`/api/v1/blog-posts/${blogPost.id}`);
 
 	t.is(res.status, 200);
 	t.is(res.body.status, 'success');
@@ -525,13 +570,12 @@ test('PUT /api/v1/blog-posts/:id - success, full', async (t) => {
 	const token = await getToken(app, admin.name, admin.password);
 
 	// Get a blog post to modify.
-	const id = await getNextBlogPostID(app);
-	const originalPost = await getBlogPost(app, id);
+	const originalPost = await getNextBlogPost(app);
 
 	// Define new blog post data.
 	// (Exclude time of day from timestamps to allow slight variation.)
 	const post = {
-		id,
+		id: originalPost.id,
 		title: `${originalPost.title} modified`,
 		author: originalPost.author,
 		created: originalPost.created,
@@ -541,7 +585,7 @@ test('PUT /api/v1/blog-posts/:id - success, full', async (t) => {
 	};
 
 	const res = await request(app)
-		.put(`/api/v1/blog-posts/${id}`)
+		.put(`/api/v1/blog-posts/${originalPost.id}`)
 		.send({
 			token,
 			title: post.title,
@@ -567,13 +611,12 @@ test('PUT /api/v1/blog-posts/:id - success, no changes', async (t) => {
 	const token = await getToken(app, admin.name, admin.password);
 
 	// Get a blog post to modify.
-	const id = await getNextBlogPostID(app);
-	const originalPost = await getBlogPost(app, id);
+	const originalPost = await getNextBlogPost(app);
 
 	// Define new blog post data.
 	// (Exclude time of day from timestamps to allow slight variation.)
 	const post = {
-		id,
+		id: originalPost.id,
 		title: originalPost.title,
 		author: originalPost.author,
 		created: originalPost.created,
@@ -583,7 +626,7 @@ test('PUT /api/v1/blog-posts/:id - success, no changes', async (t) => {
 	};
 
 	const res = await request(app)
-		.put(`/api/v1/blog-posts/${id}`)
+		.put(`/api/v1/blog-posts/${originalPost.id}`)
 		.send({
 			token,
 			title: post.title,
@@ -645,10 +688,10 @@ test('PUT /api/v1/blog-posts/:id - fail, invalid id', async (t) => {
 test('PUT /api/v1/blog-posts/:id - fail, no token', async (t) => {
 	t.plan(5);
 
-	const id = await getNextBlogPostID(app);
+	const originalPost = await getNextBlogPost(app);
 
 	const res = await request(app)
-		.put(`/api/v1/blog-posts/${id}`)
+		.put(`/api/v1/blog-posts/${originalPost.id}`)
 		.send({
 			title: 'Pizza',
 		});
@@ -663,12 +706,12 @@ test('PUT /api/v1/blog-posts/:id - fail, no token', async (t) => {
 test('PUT /api/v1/blog-posts/:id - fail, not admin', async (t) => {
 	t.plan(5);
 
-	const id = await getNextBlogPostID(app);
+	const originalPost = await getNextBlogPost(app);
 
 	const token = await getToken(app, user.name, user.password);
 
 	const res = await request(app)
-		.put(`/api/v1/blog-posts/${id}`)
+		.put(`/api/v1/blog-posts/${originalPost.id}`)
 		.send({
 			token,
 			title: 'Pizza',
@@ -689,10 +732,10 @@ test('DELETE /api/v1/blog-posts/:id - success', async (t) => {
 	// Get an admin token.
 	const token = await getToken(app, admin.name, admin.password);
 
-	const id = await getNextBlogPostID(app);
+	const blogPost = await getNextBlogPost(app);
 
 	const res = await request(app)
-		.delete(`/api/v1/blog-posts/${id}`)
+		.delete(`/api/v1/blog-posts/${blogPost.id}`)
 		.send({ token });
 
 	t.is(res.status, 200);
@@ -733,10 +776,10 @@ test('DELETE /api/v1/blog-posts/:id - fail, invalid id', async (t) => {
 test('DELETE /api/v1/blog-posts/:id - fail, no token', async (t) => {
 	t.plan(3);
 
-	const id = await getNextBlogPostID(app);
+	const blogPost = await getNextBlogPost(app);
 
 	const res = await request(app)
-		.delete(`/api/v1/blog-posts/${id}`)
+		.delete(`/api/v1/blog-posts/${blogPost.id}`)
 		.send();
 
 	t.is(res.status, 403);
@@ -747,12 +790,12 @@ test('DELETE /api/v1/blog-posts/:id - fail, no token', async (t) => {
 test('DELETE /api/v1/blog-posts/:id - fail, not admin', async (t) => {
 	t.plan(4);
 
-	const id = await getNextBlogPostID(app);
+	const blogPost = await getNextBlogPost(app);
 
 	const token = await getToken(app, user.name, user.password);
 
 	const res = await request(app)
-		.delete(`/api/v1/blog-posts/${id}`)
+		.delete(`/api/v1/blog-posts/${blogPost.id}`)
 		.send({ token });
 
 	t.is(res.status, 403);

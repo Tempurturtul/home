@@ -13,6 +13,7 @@ async function populateDB() {
 	const salt = 'this is salt';
 	const iterations = 1000;
 
+	// Add one admin user.
 	await db.database.any('INSERT INTO users (name, password.hash, password.salt, password.iterations, admin) VALUES ($1, $2, $3, $4, $5)', [
 		admin.name,
 		hashPassword(admin.password, salt, iterations),
@@ -21,6 +22,7 @@ async function populateDB() {
 		true,
 	]);
 
+	// Add one typical user.
 	await db.database.any('INSERT INTO users (name, password.hash, password.salt, password.iterations, admin) VALUES ($1, $2, $3, $4, $5)', [
 		user.name,
 		hashPassword(user.password, salt, iterations),
@@ -29,7 +31,29 @@ async function populateDB() {
 		false,
 	]);
 
-	// Add ten full blog posts.
+	// Add multiple admin users.
+	for (let i = 0; i < 25; i++) {
+		promises.push(db.database.any('INSERT INTO users (name, password.hash, password.salt, password.iterations, admin) VALUES ($1, $2, $3, $4, $5)', [
+			`${admin.name} ${i}`,
+			hashPassword(`${admin.password} ${i}`, salt, iterations),
+			salt,
+			iterations,
+			true,
+		]));
+	}
+
+	// Add multiple typical users.
+	for (let i = 0; i < 25; i++) {
+		promises.push(db.database.any('INSERT INTO users (name, password.hash, password.salt, password.iterations, admin) VALUES ($1, $2, $3, $4, $5)', [
+			`${user.name} ${i}`,
+			hashPassword(`${user.password} ${i}`, salt, iterations),
+			salt,
+			iterations,
+			false,
+		]));
+	}
+
+	// Add multiple full blog posts.
 	for (let i = 0; i < 25; i++) {
 		promises.push(db.database.any('INSERT INTO blogPosts (title, author, created, modified, tags, body) VALUES ($1, $2, $3, $4, $5, $6)', [
 			fullPost.title,
@@ -41,7 +65,7 @@ async function populateDB() {
 		]));
 	}
 
-	// Add ten min blog posts.
+	// Add multiple min blog posts.
 	for (let i = 0; i < 25; i++) {
 		promises.push(db.database.any('INSERT INTO blogPosts (title, author, created) VALUES ($1, $2, $3)', [
 			minPost.title,
