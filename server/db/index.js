@@ -196,6 +196,42 @@ function getUsers(req, res) {
 }
 
 /**
+ * Provides the user matching the name in the data portion of the JSON response
+ * if the name matches any user. JSend-compliant.
+ * @param {object} req - Express.js Request object.
+ * @param {object} req.params - Data submitted as route parameters.
+ * @param {string|number} req.params.name - The user name.
+ * @param {object} res - Express.js Response object.
+ */
+function getUserByName(req, res) {
+	const name = req.params.name;
+
+	db.oneOrNone('SELECT name, admin FROM users WHERE name=$1', [name])
+		.then((data) => {
+			if (!data) {
+				res.json({
+					status: 'fail',
+					data: {
+						name: 'No user with that name exists.',
+					},
+				});
+			} else {
+				res.json({
+					status: 'success',
+					data,
+				});
+			}
+		})
+		.catch((err) => {
+			res.json({
+				status: 'error',
+				message: 'Error retrieving user.',
+				data: err,
+			});
+		});
+}
+
+/**
  * Provides the result of inserting a blog post in the data portion of the JSON
  * response if the blog post is successfully inserted. JSend-compliant.
  * @param {object} req - Express.js Request object.
@@ -430,6 +466,7 @@ module.exports = {
 	authenticate,
 	createUser,
 	getUsers,
+	getUserByName,
 	createBlogPost,
 	getBlogPosts,
 	getBlogPostById,

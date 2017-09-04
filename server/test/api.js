@@ -257,7 +257,69 @@ test('GET /api/v1/users - fail, not admin', async (t) => {
 
 // GET /api/v1/users/:name
 
-// TODO
+test('GET /api/v1/users/:name - success', async (t) => {
+	t.plan(4);
+
+	const token = await getToken(app, admin.name, admin.password);
+
+	const name = user.name;
+
+	const res = await request(app)
+		.get(`/api/v1/users/${name}`)
+		.send({ token });
+
+	t.is(res.status, 200);
+	t.is(res.body.status, 'success');
+	t.is(res.body.data.name, user.name);
+	t.is(res.body.data.admin, false);
+});
+
+test('GET /api/v1/users/:name - fail, wrong name', async (t) => {
+	t.plan(3);
+
+	const token = await getToken(app, admin.name, admin.password);
+
+	const name = 'foofoofolomosho';
+
+	const res = await request(app)
+		.get(`/api/v1/users/${name}`)
+		.send({ token });
+
+	t.is(res.status, 200);
+	t.is(res.body.status, 'fail');
+	t.not(res.body.data.name, undefined);
+});
+
+test('GET /api/v1/users/:name - fail, no token', async (t) => {
+	t.plan(4);
+
+	const name = user.name;
+
+	const res = await request(app)
+		.get(`/api/v1/users/${name}`);
+
+	t.is(res.status, 403);
+	t.is(res.body.status, 'fail');
+	t.not(res.body.data.token, undefined);
+	t.is(res.body.data.admin, undefined);
+});
+
+test('GET /api/v1/users/:name - fail, not admin', async (t) => {
+	t.plan(4);
+
+	const token = await getToken(app, user.name, user.password);
+
+	const name = user.name;
+
+	const res = await request(app)
+		.get(`/api/v1/users/${name}`)
+		.send({ token });
+
+	t.is(res.status, 403);
+	t.is(res.body.status, 'fail');
+	t.is(res.body.data.token, undefined);
+	t.not(res.body.data.admin, undefined);
+});
 
 // PUT /api/v1/users/:name
 
