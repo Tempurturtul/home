@@ -173,6 +173,29 @@ function createUser(req, res) {
 }
 
 /**
+ * Provides an array of all users in the data portion of the JSON response if
+ * the request is successful. JSend-compliant.
+ * @param {object} req - Express.js Request object.
+ * @param {object} res - Express.js Response object.
+ */
+function getUsers(req, res) {
+	db.any('SELECT name, admin FROM users')
+		.then((data) => {
+			res.json({
+				status: 'success',
+				data,
+			});
+		})
+		.catch((err) => {
+			res.json({
+				status: 'error',
+				message: 'Error retrieving users.',
+				data: err,
+			});
+		});
+}
+
+/**
  * Provides the result of inserting a blog post in the data portion of the JSON
  * response if the blog post is successfully inserted. JSend-compliant.
  * @param {object} req - Express.js Request object.
@@ -406,6 +429,7 @@ function deleteBlogPost(req, res) {
 module.exports = {
 	authenticate,
 	createUser,
+	getUsers,
 	createBlogPost,
 	getBlogPosts,
 	getBlogPostById,

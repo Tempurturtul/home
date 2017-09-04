@@ -214,7 +214,46 @@ test('POST /api/v1/users - fail, invalid name and password', async (t) => {
 
 // GET /api/v1/users
 
-// TODO
+test('GET /api/v1/users - success', async (t) => {
+	t.plan(3);
+
+	const token = await getToken(app, admin.name, admin.password);
+
+	const res = await request(app)
+		.get('/api/v1/users')
+		.send({ token });
+
+	t.is(res.status, 200);
+	t.is(res.body.status, 'success');
+	t.not(res.body.data, undefined);
+});
+
+test('GET /api/v1/users - fail, no token', async (t) => {
+	t.plan(4);
+
+	const res = await request(app)
+		.get('/api/v1/users');
+
+	t.is(res.status, 403);
+	t.is(res.body.status, 'fail');
+	t.not(res.body.data.token, undefined);
+	t.is(res.body.data.admin, undefined);
+});
+
+test('GET /api/v1/users - fail, not admin', async (t) => {
+	t.plan(4);
+
+	const token = await getToken(app, user.name, user.password);
+
+	const res = await request(app)
+		.get('/api/v1/users')
+		.send({ token });
+
+	t.is(res.status, 403);
+	t.is(res.body.status, 'fail');
+	t.is(res.body.data.token, undefined);
+	t.not(res.body.data.admin, undefined);
+});
 
 // GET /api/v1/users/:name
 
