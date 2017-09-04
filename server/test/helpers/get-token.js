@@ -8,7 +8,7 @@ async function getToken(app, name, password) {
 			password,
 		});
 
-	if (!res.body.status === 'success') {
+	if (res.body.status !== 'success') {
 		throw new Error(`Failed to get token for user ${name}.`);
 	}
 
