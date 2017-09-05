@@ -17,8 +17,8 @@ const db = pgp(config.database);
  * contains the user's data as retrieved from the database. JSend-compliant.
  * @param {object} req - Express.js Request object.
  * @param {object} req.body - Data submitted in the request body.
- * @param {string} req.body.name - The user's name.
- * @param {string} req.body.password - The user's password.
+ * @param {string} [req.body.name] - The user's name.
+ * @param {string} [req.body.password] - The user's password.
  * @param {object} res - Express.js Response object.
  */
 function authenticate(req, res) {
@@ -94,7 +94,7 @@ function authenticate(req, res) {
  * @param {object} req - Express.js Request object.
  * @param {object} req.body - Data submitted in the request body.
  * @param {string} [req.body.name] - The user name.
- * @param {string[]} [req.body.password] - The user password.
+ * @param {string} [req.body.password] - The user password.
  * @param {object} res - Express.js Response object.
  */
 function createUser(req, res) {
@@ -272,7 +272,7 @@ function getUserByName(req, res) {
  * @param {string} req.params.name - The user name.
  * @param {object} req.body - Data submitted in the request body.
  * @param {string} [req.body.name] - The updated user name.
- * @param {string[]} [req.body.password] - The updated user password.
+ * @param {string} [req.body.password] - The updated user password.
  * @param {string} [req.body.admin] - The updated user admin status.
  * @param {object} res - Express.js Response object.
  */
@@ -429,7 +429,7 @@ function getBlogPosts(req, res) {
  * response if the ID matches any blog post. JSend-compliant.
  * @param {object} req - Express.js Request object.
  * @param {object} req.params - Data submitted as route parameters.
- * @param {string|number} req.params.id - The blog post ID. Must be an integer
+ * @param {string} req.params.id - The blog post ID. Must be an integer
  * or string representation of an integer.
  * @param {object} res - Express.js Response object.
  */
@@ -480,7 +480,7 @@ function getBlogPostById(req, res) {
  * @param {bool} req.decoded.admin - The user's admin status according to the
  * token.
  * @param {object} req.params - Data submitted as route parameters.
- * @param {string|number} req.params.id - The blog post ID. Must be an integer
+ * @param {string} req.params.id - The blog post ID. Must be an integer
  * or string representation of an integer.
  * @param {object} req.body - Data submitted in the request body.
  * @param {string} [req.body.title] - The blog post title.
@@ -553,7 +553,7 @@ function updateBlogPost(req, res) {
  * @param {bool} req.decoded.admin - The user's admin status according to the
  * token.
  * @param {object} req.params - Data submitted as route parameters.
- * @param {string|number} req.params.id - The blog post ID. Must be an integer
+ * @param {string} req.params.id - The blog post ID. Must be an integer
  * or string representation of an integer.
  * @param {object} res - Express.js Response object.
  */
