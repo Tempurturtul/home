@@ -10,7 +10,7 @@ async function populateDB() {
 
 	const promises = [];
 
-	const salt = 'this is salt';
+	const salt = 'thisissalt';
 	const iterations = 1000;
 
 	// Add one admin user.
