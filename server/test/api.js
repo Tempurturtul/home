@@ -345,7 +345,7 @@ test('GET /api/v1/users/:name - fail, not admin nor self', async (t) => {
 
 // PUT /api/v1/users/:name
 
-test.skip('PUT /api/v1/users/:name - success, full', async (t) => {
+test('PUT /api/v1/users/:name - success, full', async (t) => {
 	t.plan(5);
 
 	// Get an admin token.
@@ -371,7 +371,7 @@ test.skip('PUT /api/v1/users/:name - success, full', async (t) => {
 		});
 
 	// Retrieve the newly modified user.
-	const retrievedUser = await getUser(app, res.body.data);
+	const retrievedUser = await getUser(app, res.body.data.name);
 
 	t.is(res.status, 200);
 	t.is(res.body.status, 'success');
@@ -387,12 +387,13 @@ test.skip('PUT /api/v1/users/:name - success, full', async (t) => {
 			name: modifiedUser.name,
 			password: modifiedUser.password,
 		});
+
 	t.is(authRes.body.status, 'success');
 	t.not(authRes.body.data, undefined);
 });
 
-test.skip('PUT /api/v1/users/:name - success, no changes', async (t) => {
-	t.plan(5);
+test('PUT /api/v1/users/:name - success, no changes', async (t) => {
+	t.plan(3);
 
 	// Get an admin token.
 	const token = await getToken(app, admin.name, admin.password);
@@ -409,7 +410,7 @@ test.skip('PUT /api/v1/users/:name - success, no changes', async (t) => {
 		});
 
 	// Retrieve the newly modified user.
-	const retrievedUser = await getUser(app, res.body.data);
+	const retrievedUser = await getUser(app, res.body.data.name);
 
 	t.is(res.status, 200);
 	t.is(res.body.status, 'success');
@@ -421,7 +422,7 @@ test.skip('PUT /api/v1/users/:name - success, no changes', async (t) => {
 	// TODO Check password.
 });
 
-test.skip('PUT /api/v1/users/:name - fail, wrong name', async (t) => {
+test('PUT /api/v1/users/:name - fail, wrong name', async (t) => {
 	t.plan(3);
 
 	// Get an admin token.
@@ -440,7 +441,7 @@ test.skip('PUT /api/v1/users/:name - fail, wrong name', async (t) => {
 	t.not(res.body.data.name, undefined);
 });
 
-test.skip('PUT /api/v1/users/:name - fail, no token', async (t) => {
+test('PUT /api/v1/users/:name - fail, no token', async (t) => {
 	t.plan(4);
 
 	// Get a user to modify.
@@ -459,7 +460,7 @@ test.skip('PUT /api/v1/users/:name - fail, no token', async (t) => {
 	t.is(res.body.data.admin, undefined);
 });
 
-test.skip('PUT /api/v1/users/:name - fail, not admin', async (t) => {
+test('PUT /api/v1/users/:name - fail, not admin', async (t) => {
 	t.plan(4);
 
 	// Get a non-admin token.

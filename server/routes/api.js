@@ -14,6 +14,7 @@ router.use(verifyJWT);
 
 router.get('/users', db.getUsers);
 router.get('/users/:name', db.getUserByName);
+router.put('/users/:name', db.updateUser);
 router.post('/blog-posts', db.createBlogPost);
 router.put('/blog-posts/:id', db.updateBlogPost);
 router.delete('/blog-posts/:id', db.deleteBlogPost);

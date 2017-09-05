@@ -1,8 +1,8 @@
 // Responses are JSend-compliant JSON. (http://labs.omniti.com/labs/jsend)
 
-const crypto = require('crypto');
 const pgp = require('pg-promise')();
 const jwt = require('jsonwebtoken');
+const passwordConfig = require('./password-config');
 const config = require('../config');
 const validUserName = require('../helpers/valid-user-name');
 const validUserPassword = require('../helpers/valid-user-password');
@@ -131,21 +131,19 @@ function createUser(req, res) {
 			data,
 		});
 	} else {
-		// The number of hash iterations to perform. (40,000 recommended as of August 2017.)
-		const iterations = 40000;
-		// Get strong random salt. (16+ bytes recommended, 32 used.)
-		const salt = crypto.randomBytes(32).toString('hex');
-		// Number of bytes of output to take as the final hash.
-		const outputBytes = 32;
+		const salt = passwordConfig.getSalt();
 		// Hash the password.
-		const hash = hashPassword(password, salt, iterations, outputBytes);
+		const hash = hashPassword(password,
+			salt,
+			passwordConfig.iterations,
+			passwordConfig.outputBytes);
 
 		const queryStr = 'INSERT INTO ' +
 			'users(name, password.hash, password.salt, password.iterations, admin) ' +
 			'VALUES($1, $2, $3, $4, false) ' +
 			'RETURNING name';
 
-		db.one(queryStr, [name, hash, salt, iterations])
+		db.one(queryStr, [name, hash, salt, passwordConfig.iterations])
 			.then((data) => {
 				res.json({
 					status: 'success',
@@ -219,7 +217,7 @@ function getUsers(req, res) {
  * @param {bool} req.decoded.admin - The user's admin status according to the
  * token.
  * @param {object} req.params - Data submitted as route parameters.
- * @param {string|number} req.params.name - The user name.
+ * @param {string} req.params.name - The user name.
  * @param {object} res - Express.js Response object.
  */
 function getUserByName(req, res) {
@@ -246,6 +244,89 @@ function getUserByName(req, res) {
 				res.json({
 					status: 'error',
 					message: 'Error retrieving user.',
+					data: err,
+				});
+			});
+	} else {
+		// Not admin nor target user, access denied. (403 Forbidden)
+		res.status(403).json({
+			status: 'fail',
+			data: {
+				admin: 'You must be an admin (or the target user) to perform this action.',
+			},
+		});
+	}
+}
+
+
+/**
+ * Provides the result of updating a user in the data portion of the JSON
+ * response if the user is successfully updated. JSend-compliant.
+ * @param {object} req - Express.js Request object.
+ * @param {object} req.decoded - The decoded JSON Web Token payload, provided
+ * automatically by middleware.
+ * @param {string} req.decoded.name - The user's name according to the token.
+ * @param {bool} req.decoded.admin - The user's admin status according to the
+ * token.
+ * @param {object} req.params - Data submitted as route parameters.
+ * @param {string} req.params.name - The user name.
+ * @param {object} req.body - Data submitted in the request body.
+ * @param {string} [req.body.name] - The updated user name.
+ * @param {string[]} [req.body.password] - The updated user password.
+ * @param {string} [req.body.admin] - The updated user admin status.
+ * @param {object} res - Express.js Response object.
+ */
+function updateUser(req, res) {
+	const name = req.params.name;
+
+	if (req.decoded.admin || req.decoded.name === name) {
+		const queryStr = `UPDATE users SET
+			name = $2,
+			${req.body.password ? 'password.hash = $3, password.salt = $4, password.iterations = $5, ' : ''}
+			admin = $${req.body.password ? '6' : '3'}
+			WHERE name = $1 RETURNING name`;
+
+		const values = [
+			name,
+			req.body.name || name,
+		];
+
+		if (req.body.password) {
+			const salt = passwordConfig.getSalt();
+			// Hash the password.
+			const hash = hashPassword(req.body.password,
+				salt,
+				passwordConfig.iterations,
+				passwordConfig.outputBytes);
+
+			values.push(hash);
+			values.push(salt);
+			values.push(passwordConfig.iterations);
+		}
+
+		// Only allow target user to be set as admin if requesting user is an admin.
+		values.push(req.decoded.admin ? (req.body.admin || false) : false);
+
+		db.oneOrNone(queryStr, values)
+			.then((data) => {
+				if (!data) {
+					res.json({
+						status: 'fail',
+						data: {
+							name: 'No user with that name exists.',
+						},
+					});
+				} else {
+					res.json({
+						status: 'success',
+						data,
+					});
+				}
+			})
+			.catch((err) => {
+				res.json({
+					status: 'error',
+					message: 'Error updating user.',
 					data: err,
 				});
 			});
@@ -532,6 +613,7 @@ module.exports = {
 	createUser,
 	getUsers,
 	getUserByName,
+	updateUser,
 	createBlogPost,
 	getBlogPosts,
 	getBlogPostById,
