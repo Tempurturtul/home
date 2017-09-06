@@ -2,7 +2,6 @@
 
 const pgp = require('pg-promise')();
 const jwt = require('jsonwebtoken');
-const passwordConfig = require('./password-config');
 const config = require('../config');
 const validUserName = require('../helpers/valid-user-name');
 const validUserPassword = require('../helpers/valid-user-password');
@@ -131,19 +130,19 @@ function createUser(req, res) {
 			data,
 		});
 	} else {
-		const salt = passwordConfig.getSalt();
+		const salt = config.password.getSalt();
 		// Hash the password.
 		const hash = hashPassword(password,
 			salt,
-			passwordConfig.iterations,
-			passwordConfig.outputBytes);
+			config.password.iterations,
+			config.password.outputBytes);
 
 		const queryStr = 'INSERT INTO ' +
 			'users(name, password.hash, password.salt, password.iterations, admin) ' +
 			'VALUES($1, $2, $3, $4, false) ' +
 			'RETURNING name';
 
-		db.one(queryStr, [name, hash, salt, passwordConfig.iterations])
+		db.one(queryStr, [name, hash, salt, config.password.iterations])
 			.then((data) => {
 				res.json({
 					status: 'success',
@@ -292,16 +291,16 @@ function updateUser(req, res) {
 		];
 
 		if (req.body.password) {
-			const salt = passwordConfig.getSalt();
+			const salt = config.password.getSalt();
 			// Hash the password.
 			const hash = hashPassword(req.body.password,
 				salt,
-				passwordConfig.iterations,
-				passwordConfig.outputBytes);
+				config.password.iterations,
+				config.password.outputBytes);
 
 			values.push(hash);
 			values.push(salt);
-			values.push(passwordConfig.iterations);
+			values.push(config.password.iterations);
 		}
 
 		// Only allow target user to be set as admin if requesting user is an admin.
