@@ -693,7 +693,7 @@ test('PUT /api/v1/blog-posts/:id - success, full', async (t) => {
 		author: originalPost.author,
 		created: originalPost.created,
 		modified: new Date().toLocaleDateString(),
-		tags: originalPost.tags.concat(['modified']),
+		tags: originalPost.tags ? originalPost.tags.concat(['modified']) : ['modified'],
 		body: `${originalPost.body} modified`,
 	};
 
