@@ -605,7 +605,7 @@ test('PUT /api/v1/users/:name - fail, non-admin self role change', async (t) => 
 
 // DELETE /api/v1/users/:name
 
-test.skip('DELETE /api/v1/users/:name - success, admin', async (t) => {
+test('DELETE /api/v1/users/:name - success, admin', async (t) => {
 	t.plan(3);
 
 	// Get an admin token.
@@ -622,7 +622,7 @@ test.skip('DELETE /api/v1/users/:name - success, admin', async (t) => {
 	t.not(res.body.data, undefined);
 });
 
-test.skip('DELETE /api/v1/users/:name - success, self', async (t) => {
+test('DELETE /api/v1/users/:name - success, self', async (t) => {
 	t.plan(3);
 
 	// Get a user to modify.
@@ -640,7 +640,7 @@ test.skip('DELETE /api/v1/users/:name - success, self', async (t) => {
 	t.not(res.body.data, undefined);
 });
 
-test.skip('DELETE /api/v1/users/:name - fail, wrong name', async (t) => {
+test('DELETE /api/v1/users/:name - fail, wrong name', async (t) => {
 	t.plan(3);
 
 	// Get an admin token.
@@ -655,7 +655,7 @@ test.skip('DELETE /api/v1/users/:name - fail, wrong name', async (t) => {
 	t.not(res.body.data.name, undefined);
 });
 
-test.skip('DELETE /api/v1/users/:name - fail, no token', async (t) => {
+test('DELETE /api/v1/users/:name - fail, no token', async (t) => {
 	t.plan(3);
 
 	const user = await createUser(app, roles.USER);
@@ -669,7 +669,7 @@ test.skip('DELETE /api/v1/users/:name - fail, no token', async (t) => {
 	t.not(res.body.data.token, undefined);
 });
 
-test.skip('DELETE /api/v1/users/:name - fail, not admin nor self', async (t) => {
+test('DELETE /api/v1/users/:name - fail, not admin nor self', async (t) => {
 	t.plan(4);
 
 	const user = await createUser(app, roles.USER);

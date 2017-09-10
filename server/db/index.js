@@ -355,6 +355,58 @@ function updateUser(req, res) {
 }
 
 /**
+ * Provides the result of deleting a user in the data portion of the JSON
+ * response if the user is successfully deleted. JSend-compliant.
+ * @param {object} req - Express.js Request object.
+ * @param {object} req.decoded - The decoded JSON Web Token payload, provided
+ * automatically by middleware.
+ * @param {string} req.decoded.name - The user's name according to the token.
+ * @param {string} req.decoded.role - The user's role according to the token.
+ * @param {object} req.params - Data submitted as route parameters.
+ * @param {string} req.params.name - The user name.
+ * @param {object} res - Express.js Response object.
+ */
+function deleteUser(req, res) {
+	const name = req.params.name;
+	const isAdmin = req.decoded.role === roles.ADMIN;
+
+	// Must be either an admin or the target user.
+	if (isAdmin || req.decoded.name === name) {
+		db.oneOrNone('DELETE FROM users WHERE name = $1 RETURNING name', [name])
+			.then((data) => {
+				if (!data) {
+					res.json({
+						status: 'fail',
+						data: {
+							name: 'No user with that name exists.',
+						},
+					});
+				} else {
+					res.json({
+						status: 'success',
+						data,
+					});
+				}
+			})
+			.catch((err) => {
+				res.json({
+					status: 'error',
+					message: 'Error deleting user.',
+					data: err,
+				});
+			});
+	} else {
+		// Not admin nor target user, access denied. (403 Forbidden)
+		res.status(403).json({
+			status: 'fail',
+			data: {
+				role: 'You must be an admin (or the target user) to perform this action.',
+			},
+		});
+	}
+}
+
+/**
  * Provides the result of inserting a blog post in the data portion of the JSON
  * response if the blog post is successfully inserted. JSend-compliant.
  * @param {object} req - Express.js Request object.
@@ -627,6 +679,7 @@ module.exports = {
 	getUsers,
 	getUserByName,
 	updateUser,
+	deleteUser,
 	createBlogPost,
 	getBlogPosts,
 	getBlogPostById,
