@@ -1,13 +1,49 @@
 {
 	"users": {
-		"admin": {
-			"name": "test admin",
-			"password": "password"
-		},
-		"normal": {
-			"name": "test user",
-			"password": "password"
-		}
+		"admins": [
+			{
+				"name": "test admin 0",
+				"password": "admin password 0"
+			},
+			{
+				"name": "test admin 1",
+				"password": "admin password 1"
+			},
+			{
+				"name": "test admin 2",
+				"password": "admin password 2"
+			},
+			{
+				"name": "test admin 3",
+				"password": "admin password 3"
+			},
+			{
+				"name": "test admin 4",
+				"password": "admin password 4"
+			}
+		],
+		"users": [
+			{
+				"name": "test user 0",
+				"password": "user password 0"
+			},
+			{
+				"name": "test user 1",
+				"password": "user password 1"
+			},
+			{
+				"name": "test user 2",
+				"password": "user password 2"
+			},
+			{
+				"name": "test user 3",
+				"password": "user password 3"
+			},
+			{
+				"name": "test user 4",
+				"password": "user password 4"
+			}
+		]
 	},
 	"blogPosts": {
 		"full": {

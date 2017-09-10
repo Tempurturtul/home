@@ -2,6 +2,7 @@
 
 const pgp = require('pg-promise')();
 const jwt = require('jsonwebtoken');
+const roles = require('./user-roles');
 const config = require('../config');
 const validUserName = require('../helpers/valid-user-name');
 const validUserPassword = require('../helpers/valid-user-password');
@@ -99,6 +100,9 @@ function authenticate(req, res) {
 function createUser(req, res) {
 	const { name, password } = req.body;
 
+	// Always create users with the USER role.
+	const role = roles.USER;
+
 	if (!name || !password) {
 		const data = {};
 
@@ -107,7 +111,7 @@ function createUser(req, res) {
 		}
 
 		if (!password) {
-			data.password = 'A pasword is required.';
+			data.password = 'A password is required.';
 		}
 
 		res.json({
@@ -138,11 +142,11 @@ function createUser(req, res) {
 			config.password.outputBytes);
 
 		const queryStr = 'INSERT INTO ' +
-			'users(name, password.hash, password.salt, password.iterations, admin) ' +
-			'VALUES($1, $2, $3, $4, false) ' +
-			'RETURNING name';
+			'users(name, password.hash, password.salt, password.iterations, role) ' +
+			'VALUES($1, $2, $3, $4, $5) ' +
+			'RETURNING name, role';
 
-		db.one(queryStr, [name, hash, salt, config.password.iterations])
+		db.many(queryStr, [name, hash, salt, config.password.iterations, role])
 			.then((data) => {
 				res.json({
 					status: 'success',
@@ -175,13 +179,12 @@ function createUser(req, res) {
  * @param {object} req - Express.js Request object.
  * @param {object} req.decoded - The decoded JSON Web Token payload, provided
  * automatically by middleware.
- * @param {bool} req.decoded.admin - The user's admin status according to the
- * token.
+ * @param {string} req.decoded.role - The user's role according to the token.
  * @param {object} res - Express.js Response object.
  */
 function getUsers(req, res) {
-	if (req.decoded.admin) {
-		db.any('SELECT name, admin FROM users')
+	if (req.decoded.role === roles.ADMIN) {
+		db.any('SELECT name, role FROM users')
 			.then((data) => {
 				res.json({
 					status: 'success',
@@ -200,7 +203,7 @@ function getUsers(req, res) {
 		res.status(403).json({
 			status: 'fail',
 			data: {
-				admin: 'You must be an admin to perform this action.',
+				role: 'You must be an admin to perform this action.',
 			},
 		});
 	}
@@ -213,8 +216,7 @@ function getUsers(req, res) {
  * @param {object} req.decoded - The decoded JSON Web Token payload, provided
  * automatically by middleware.
  * @param {string} req.decoded.name - The user's name according to the token.
- * @param {bool} req.decoded.admin - The user's admin status according to the
- * token.
+ * @param {string} req.decoded.role - The user's role according to the token.
  * @param {object} req.params - Data submitted as route parameters.
  * @param {string} req.params.name - The user name.
  * @param {object} res - Express.js Response object.
@@ -222,8 +224,8 @@ function getUsers(req, res) {
 function getUserByName(req, res) {
 	const name = req.params.name;
 
-	if (req.decoded.admin || req.decoded.name === name) {
-		db.oneOrNone('SELECT name, admin FROM users WHERE name=$1', [name])
+	if (req.decoded.role === roles.ADMIN || req.decoded.name === name) {
+		db.oneOrNone('SELECT name, role FROM users WHERE name=$1', [name])
 			.then((data) => {
 				if (!data) {
 					res.json({
@@ -251,12 +253,11 @@ function getUserByName(req, res) {
 		res.status(403).json({
 			status: 'fail',
 			data: {
-				admin: 'You must be an admin (or the target user) to perform this action.',
+				role: 'You must be an admin (or the target user) to perform this action.',
 			},
 		});
 	}
 }
-
 
 /**
  * Provides the result of updating a user in the data portion of the JSON
@@ -265,76 +266,89 @@ function getUserByName(req, res) {
  * @param {object} req.decoded - The decoded JSON Web Token payload, provided
  * automatically by middleware.
  * @param {string} req.decoded.name - The user's name according to the token.
- * @param {bool} req.decoded.admin - The user's admin status according to the
- * token.
+ * @param {string} req.decoded.role - The user's role according to the token.
  * @param {object} req.params - Data submitted as route parameters.
  * @param {string} req.params.name - The user name.
  * @param {object} req.body - Data submitted in the request body.
  * @param {string} [req.body.name] - The updated user name.
  * @param {string} [req.body.password] - The updated user password.
- * @param {string} [req.body.admin] - The updated user admin status.
+ * @param {string} [req.body.role=roles.USER] - The updated user's role.
  * @param {object} res - Express.js Response object.
  */
 function updateUser(req, res) {
 	const name = req.params.name;
+	const isAdmin = req.decoded.role === roles.ADMIN;
 
-	if (req.decoded.admin || req.decoded.name === name) {
-		const queryStr = `UPDATE users SET
-			name = $2,
-			${req.body.password ? 'password.hash = $3, password.salt = $4, password.iterations = $5, ' : ''}
-			admin = $${req.body.password ? '6' : '3'}
-			WHERE name = $1 RETURNING name`;
-
-		const values = [
-			name,
-			req.body.name || name,
-		];
-
-		if (req.body.password) {
-			const salt = config.password.getSalt();
-			// Hash the password.
-			const hash = hashPassword(req.body.password,
-				salt,
-				config.password.iterations,
-				config.password.outputBytes);
-
-			values.push(hash);
-			values.push(salt);
-			values.push(config.password.iterations);
-		}
-
-		// Only allow target user to be set as admin if requesting user is an admin.
-		values.push(req.decoded.admin ? (req.body.admin || false) : false);
-
-		db.oneOrNone(queryStr, values)
-			.then((data) => {
-				if (!data) {
-					res.json({
-						status: 'fail',
-						data: {
-							name: 'No user with that name exists.',
-						},
-					});
-				} else {
-					res.json({
-						status: 'success',
-						data,
-					});
-				}
-			})
-			.catch((err) => {
-				res.json({
-					status: 'error',
-					message: 'Error updating user.',
-					data: err,
-				});
+	// Must be either an admin or the target user.
+	if (isAdmin || req.decoded.name === name) {
+		// Only admins may modify the target user's role.
+		if (!isAdmin && req.body.role) {
+			res.status(403).json({
+				status: 'fail',
+				data: {
+					role: 'Only admins may change roles.',
+				},
 			});
+		} else {
+			// Define the update query string, optionally including an updated password.
+			const queryStr = `UPDATE users SET
+				name = $2,
+				${req.body.password ? 'password.hash = $3, password.salt = $4, password.iterations = $5, ' : ''}
+				role = $${req.body.password ? '6' : '3'}
+				WHERE name = $1 RETURNING name`;
+
+			// Define the values for the query string.
+			const values = [
+				name,
+				req.body.name || name,
+			];
+
+			// Only optionally include a password in the values.
+			if (req.body.password) {
+				const salt = config.password.getSalt();
+				// Hash the password.
+				const hash = hashPassword(req.body.password,
+					salt,
+					config.password.iterations,
+					config.password.outputBytes);
+
+				values.push(hash);
+				values.push(salt);
+				values.push(config.password.iterations);
+			}
+
+			values.push(req.body.role || roles.USER);
+
+			db.oneOrNone(queryStr, values)
+				.then((data) => {
+					if (!data) {
+						res.json({
+							status: 'fail',
+							data: {
+								name: 'No user with that name exists.',
+							},
+						});
+					} else {
+						res.json({
+							status: 'success',
+							data,
+						});
+					}
+				})
+				.catch((err) => {
+					res.json({
+						status: 'error',
+						message: 'Error updating user.',
+						data: err,
+					});
+				});
+		}
 	} else {
 		// Not admin nor target user, access denied. (403 Forbidden)
 		res.status(403).json({
 			status: 'fail',
 			data: {
-				admin: 'You must be an admin (or the target user) to perform this action.',
+				role: 'You must be an admin (or the target user) to perform this action.',
 			},
 		});
 	}

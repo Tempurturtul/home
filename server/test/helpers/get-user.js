@@ -1,17 +1,21 @@
 import request from 'supertest';
-import getToken from './get-token';
-import testData from './test-data.json';
-
-const admin = testData.users.admin;
+import getAdminToken from './get-admin-token';
 
 async function getUser(app, name) {
-	const token = await getToken(app, admin.name, admin.password);
+	const token = await getAdminToken(app);
 
 	const res = await request(app)
 		.get(`/api/v1/users/${name}`)
 		.send({ token });
 
-	return res.body.data;
+	if (res.body.status !== 'success') {
+		console.error(res.body.data);
+		throw new Error(`Failed to get user ${name}.`);
+	}
+
+	const user = res.body.data;
+
+	return user;
 }
 
 export default getUser;

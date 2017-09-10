@@ -9,6 +9,12 @@ CREATE TYPE password AS (
 	iterations INTEGER
 );
 
+CREATE TABLE users (
+	name VARCHAR PRIMARY KEY,
+	password PASSWORD NOT NULL,
+	role VARCHAR NOT NULL
+);
+
 CREATE TABLE blogPosts (
 	id SERIAL PRIMARY KEY,
 	title VARCHAR NOT NULL,
@@ -17,10 +23,4 @@ CREATE TABLE blogPosts (
 	modified TIMESTAMP,
 	tags VARCHAR[],
 	body VARCHAR
-);
-
-CREATE TABLE users (
-	name VARCHAR PRIMARY KEY,
-	password PASSWORD NOT NULL,
-	admin BOOLEAN
 );

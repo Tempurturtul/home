@@ -9,7 +9,8 @@ async function getToken(app, name, password) {
 		});
 
 	if (res.body.status !== 'success') {
-		throw new Error(`Failed to get token for user ${name}.`);
+		console.log(res.body);
+		throw new Error(`Failed to get token for user ${name} with password ${password}.`);
 	}
 
 	return res.body.data;

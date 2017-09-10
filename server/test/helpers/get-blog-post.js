@@ -4,7 +4,14 @@ async function getBlogPost(app, id) {
 	const res = await request(app)
 		.get(`/api/v1/blog-posts/${id}`);
 
-	return res.body.data;
+	if (res.body.status !== 'success') {
+		console.error(res.body.data);
+		throw new Error(`Failed to get blog post ${id}`);
+	}
+
+	const blogPost = res.body.data;
+
+	return blogPost;
 }
 
 export default getBlogPost;
