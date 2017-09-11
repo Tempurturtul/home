@@ -11,7 +11,7 @@ app.set('port', process.env.PORT || 3000);
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-// Routes.
+// Define routes.
 app.use('/api/v1', apiRouter);
 
 // Start the server.
