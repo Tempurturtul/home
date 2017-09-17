@@ -4,6 +4,8 @@ Server for my home on the web.
 
 ## API Overview
 
+**All responses are [JSend](https://labs.omniti.com/labs/jsend) formatted JSON.**
+
 | Resource 				| `POST` (Create) 						| `GET` (Read) 							| `PUT` (Update) 					| `DELETE` (Delete) 				|
 |-----------------------|---------------------------------------|---------------------------------------|-----------------------------------|-----------------------------------|
 | `/authenticate` 		| Create a new authorization token. 	| - 									| - 								| - 								|
