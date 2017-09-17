@@ -1,6 +1,6 @@
 import request from 'supertest';
 import createUser from './create-user';
-import roles from '../../db/user-roles';
+import roles from '../../src/lib/user-roles';
 
 let admin;
 
@@ -20,7 +20,7 @@ async function getAdminToken(app) {
 		throw new Error('Failed to get admin token.');
 	}
 
-	const token = res.body.data;
+	const token = res.body.data.token;
 
 	return token;
 }

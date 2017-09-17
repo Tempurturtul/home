@@ -1,8 +1,8 @@
-import db from '../../db';
+import db from '../../src/db/db';
 
 async function resetDB() {
-	await db.database.any('DELETE FROM blogPosts *');
-	await db.database.any('DELETE FROM users *');
+	await db.any('DELETE FROM blogPosts *');
+	await db.any('DELETE FROM users *');
 }
 
 export default resetDB;

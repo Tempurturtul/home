@@ -1,7 +1,7 @@
 import test from 'ava';
-import validUserName from '../helpers/valid-user-name';
+import validUserName from '../src/lib/valid-user-name';
 
-test('validates user names', (t) => {
+test('identifies valid user names', (t) => {
 	const validNames = [
 		'Barry Boron',
 		'Maximum Overdrive the 5th',

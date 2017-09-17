@@ -44,18 +44,18 @@ cd home/server
 npm install
 ```
 
-Create a `config.js` file using [`config.template.js`](./config.template.js) as a template.
+Create a `src/config.js` file using [`src/config.template.js`](./src/config.template.js) as a template.
 
 - A typical local database connection string should look like the following on Ubuntu:
 	- `postgres://user:password@localhost:5432/home`
 
 ### Set Up Local Database:
 
-***In the following, use the user and password defined in your `config.js` file.***
+***In the following, use the user and password defined in your `src/config.js` file.***
 
 ```bash
 # Create database using provided file.
-sudo --user=YOUR_USER psql --file=db/home.sql
+sudo --user=YOUR_USER psql --file=src/db/home.sql
 
 # Create a password for the database.
 sudo --user=YOUR_USER psql home

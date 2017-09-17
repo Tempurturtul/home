@@ -13,7 +13,7 @@ async function getUser(app, name) {
 		throw new Error(`Failed to get user ${name}.`);
 	}
 
-	const user = res.body.data;
+	const user = res.body.data.user;
 
 	return user;
 }

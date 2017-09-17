@@ -1,6 +1,6 @@
 import express from 'express';
 import bodyParser from 'body-parser';
-import apiRouter from '../../routes/api';
+import apiRouter from '../../src/routes/api';
 
 function makeApp() {
 	const app = express();

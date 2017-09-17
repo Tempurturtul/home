@@ -13,7 +13,7 @@ async function getToken(app, name, password) {
 		throw new Error(`Failed to get token for user ${name} with password ${password}.`);
 	}
 
-	return res.body.data;
+	return res.body.data.token;
 }
 
 export default getToken;

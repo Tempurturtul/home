@@ -9,7 +9,7 @@ async function getBlogPost(app, id) {
 		throw new Error(`Failed to get blog post ${id}`);
 	}
 
-	const blogPost = res.body.data;
+	const blogPost = res.body.data.blogPost;
 
 	return blogPost;
 }

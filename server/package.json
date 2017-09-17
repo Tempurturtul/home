@@ -1,11 +1,11 @@
 {
   "name": "home-server",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "Server for Matthew Feidt's home on the web.",
   "author": "Tempurturtul <tempurturtul@gmail.com>",
   "private": true,
   "scripts": {
-    "start": "nodemon server.js",
+    "start": "nodemon src/server.js",
     "test": "eslint --ext .js ./ && ava"
   },
   "engines": {
