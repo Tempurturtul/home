@@ -272,10 +272,27 @@ test('GET /api/v1/users - fail, no token', async (t) => {
 	t.is(res.body.data.role, undefined);
 });
 
-test('GET /api/v1/users - fail, not admin', async (t) => {
+test('GET /api/v1/users - fail, user', async (t) => {
 	t.plan(4);
 
 	const user = await createUser(app, roles.USER);
+
+	const token = await getToken(app, user.name, user.password);
+
+	const res = await request(app)
+		.get('/api/v1/users')
+		.send({ token });
+
+	t.is(res.status, 200);
+	t.is(res.body.status, 'fail');
+	t.is(res.body.data.token, undefined);
+	t.not(res.body.data.role, undefined);
+});
+
+test('GET /api/v1/users - fail, contributor', async (t) => {
+	t.plan(4);
+
+	const user = await createUser(app, roles.CONTRIBUTOR);
 
 	const token = await getToken(app, user.name, user.password);
 
@@ -353,10 +370,29 @@ test('GET /api/v1/users/:name - fail, no token', async (t) => {
 	t.is(res.body.data.role, undefined);
 });
 
-test('GET /api/v1/users/:name - fail, not admin nor self', async (t) => {
+test('GET /api/v1/users/:name - fail, user not self', async (t) => {
 	t.plan(4);
 
 	const user = await createUser(app, roles.USER);
+
+	const token = await getToken(app, user.name, user.password);
+
+	const otherUser = await createUser(app, roles.USER);
+
+	const res = await request(app)
+		.get(`/api/v1/users/${otherUser.name}`)
+		.send({ token });
+
+	t.is(res.status, 200);
+	t.is(res.body.status, 'fail');
+	t.is(res.body.data.token, undefined);
+	t.not(res.body.data.role, undefined);
+});
+
+test('GET /api/v1/users/:name - fail, contributor not self', async (t) => {
+	t.plan(4);
+
+	const user = await createUser(app, roles.CONTRIBUTOR);
 
 	const token = await getToken(app, user.name, user.password);
 
@@ -535,7 +571,7 @@ test('PUT /api/v1/users/:name - fail, no token', async (t) => {
 	t.is(res.body.data.role, undefined);
 });
 
-test('PUT /api/v1/users/:name - fail, not admin nor self', async (t) => {
+test('PUT /api/v1/users/:name - fail, user not self', async (t) => {
 	t.plan(4);
 
 	const user = await createUser(app, roles.USER);
@@ -560,11 +596,67 @@ test('PUT /api/v1/users/:name - fail, not admin nor self', async (t) => {
 	t.not(res.body.data.role, undefined);
 });
 
-test('PUT /api/v1/users/:name - fail, non-admin self role change', async (t) => {
+test('PUT /api/v1/users/:name - fail, contributor not self', async (t) => {
+	t.plan(4);
+
+	const user = await createUser(app, roles.CONTRIBUTOR);
+
+	// Get a non-admin token.
+	const token = await getToken(app, user.name, user.password);
+
+	// Get a user to modify.
+	const originalUser = await createUser(app, roles.USER);
+
+	const res = await request(app)
+		.put(`/api/v1/users/${originalUser.name}`)
+		.send({
+			token,
+			name: originalUser.name,
+			role: originalUser.role,
+		});
+
+	t.is(res.status, 200);
+	t.is(res.body.status, 'fail');
+	t.is(res.body.data.token, undefined);
+	t.not(res.body.data.role, undefined);
+});
+
+test('PUT /api/v1/users/:name - fail, user role change', async (t) => {
 	t.plan(4);
 
 	// Get a user to modify.
 	const originalUser = await createUser(app, roles.USER);
+
+	// Get the user's token.
+	const token = await getToken(app, originalUser.name, originalUser.password);
+
+	// Define new user data.
+	const modifiedUser = {
+		name: `${originalUser.name}_modified`,
+		password: 'modified password',
+		role: roles.ADMIN,
+	};
+
+	const res = await request(app)
+		.put(`/api/v1/users/${originalUser.name}`)
+		.send({
+			token,
+			name: modifiedUser.name,
+			password: modifiedUser.password,
+			role: modifiedUser.role,
+		});
+
+	t.is(res.status, 200);
+	t.is(res.body.status, 'fail');
+	t.is(res.body.data.token, undefined);
+	t.not(res.body.data.role, undefined);
+});
+
+test('PUT /api/v1/users/:name - fail, contributor role change', async (t) => {
+	t.plan(4);
+
+	// Get a user to modify.
+	const originalUser = await createUser(app, roles.CONTRIBUTOR);
 
 	// Get the user's token.
 	const token = await getToken(app, originalUser.name, originalUser.password);
@@ -657,7 +749,7 @@ test('DELETE /api/v1/users/:name - fail, no token', async (t) => {
 	t.not(res.body.data.token, undefined);
 });
 
-test('DELETE /api/v1/users/:name - fail, not admin nor self', async (t) => {
+test('DELETE /api/v1/users/:name - fail, user not self', async (t) => {
 	t.plan(4);
 
 	const user = await createUser(app, roles.USER);
@@ -678,9 +770,30 @@ test('DELETE /api/v1/users/:name - fail, not admin nor self', async (t) => {
 	t.not(res.body.data.role, undefined);
 });
 
+test('DELETE /api/v1/users/:name - fail, contributor not self', async (t) => {
+	t.plan(4);
+
+	const user = await createUser(app, roles.CONTRIBUTOR);
+
+	// Get a non-admin token.
+	const token = await getToken(app, user.name, user.password);
+
+	// Get a user to modify.
+	const originalUser = await createUser(app, roles.USER);
+
+	const res = await request(app)
+		.delete(`/api/v1/users/${originalUser.name}`)
+		.send({ token });
+
+	t.is(res.status, 200);
+	t.is(res.body.status, 'fail');
+	t.is(res.body.data.token, undefined);
+	t.not(res.body.data.role, undefined);
+});
+
 // POST /api/v1/blog-posts
 
-test('POST /api/v1/blog-posts - success, full', async (t) => {
+test('POST /api/v1/blog-posts - success, admin full', async (t) => {
 	t.plan(4);
 
 	// Get an admin token.
@@ -712,7 +825,7 @@ test('POST /api/v1/blog-posts - success, full', async (t) => {
 	t.deepEqual(post, retrievedPost);
 });
 
-test('POST /api/v1/blog-posts - success, minimum', async (t) => {
+test('POST /api/v1/blog-posts - success, admin minimum', async (t) => {
 	t.plan(4);
 
 	// Get an admin token.
@@ -746,6 +859,39 @@ test('POST /api/v1/blog-posts - success, minimum', async (t) => {
 	t.deepEqual(post, retrievedPost);
 });
 
+test('POST /api/v1/blog-posts - success, contributor', async (t) => {
+	t.plan(4);
+
+	const user = await createUser(app, roles.CONTRIBUTOR);
+
+	const token = await getToken(app, user.name, user.password);
+
+	const post = await createBlogPost(app, token);
+
+	const res = await request(app)
+		.post('/api/v1/blog-posts')
+		.send({
+			token,
+			title: post.title,
+			tags: post.tags,
+			body: post.body,
+		});
+
+	// Retrieve the newly created blog post.
+	const retrievedPost = await getBlogPost(app, res.body.data.blogPost.id);
+
+	// Don't compare IDs or created time minutes.
+	post.id = undefined;
+	retrievedPost.id = undefined;
+	post.created = post.created.split(':')[0];
+	retrievedPost.created = retrievedPost.created.split(':')[0];
+
+	t.is(res.status, 200);
+	t.is(res.body.status, 'success');
+	t.not(res.body.data.blogPost, undefined);
+	t.deepEqual(post, retrievedPost);
+});
+
 test('POST /api/v1/blog-posts - fail, no token', async (t) => {
 	t.plan(4);
 
@@ -761,7 +907,7 @@ test('POST /api/v1/blog-posts - fail, no token', async (t) => {
 	t.is(res.body.data.role, undefined);
 });
 
-test('POST /api/v1/blog-posts - fail, not admin', async (t) => {
+test('POST /api/v1/blog-posts - fail, user', async (t) => {
 	t.plan(4);
 
 	const user = await createUser(app, roles.USER);
@@ -833,7 +979,7 @@ test('GET /api/v1/blog-posts/:id - fail, invalid id', async (t) => {
 
 // PUT /api/v1/blog-posts/:id
 
-test('PUT /api/v1/blog-posts/:id - success, full', async (t) => {
+test('PUT /api/v1/blog-posts/:id - success, admin full', async (t) => {
 	t.plan(4);
 
 	// Get an admin token.
@@ -875,7 +1021,7 @@ test('PUT /api/v1/blog-posts/:id - success, full', async (t) => {
 	t.deepEqual(post, retrievedPost);
 });
 
-test('PUT /api/v1/blog-posts/:id - success, no changes', async (t) => {
+test('PUT /api/v1/blog-posts/:id - success, admin no changes', async (t) => {
 	t.plan(4);
 
 	// Get an admin token.
@@ -899,6 +1045,48 @@ test('PUT /api/v1/blog-posts/:id - success, no changes', async (t) => {
 		.put(`/api/v1/blog-posts/${originalPost.id}`)
 		.send({
 			token,
+		});
+
+	// Retrieve the newly modified blog post.
+	const retrievedPost = await getBlogPost(app, res.body.data.blogPost.id);
+
+	// Don't compare modified timestamp minutes.
+	post.modified = post.modified.split(':')[0];
+	retrievedPost.modified = retrievedPost.modified.split(':')[0];
+
+	t.is(res.status, 200);
+	t.is(res.body.status, 'success');
+	t.not(res.body.data.blogPost, undefined);
+	t.deepEqual(post, retrievedPost);
+});
+
+test('PUT /api/v1/blog-posts/:id - success, contributor', async (t) => {
+	t.plan(4);
+
+	const user = await createUser(app, roles.CONTRIBUTOR);
+
+	const token = await getToken(app, user.name, user.password);
+
+	const originalPost = await createBlogPost(app, token);
+
+	// Define new blog post data.
+	const post = {
+		id: originalPost.id,
+		title: `${originalPost.title} modified`,
+		author: originalPost.author,
+		created: originalPost.created,
+		modified: new Date().toISOString(),
+		tags: originalPost.tags ? originalPost.tags.concat(['modified']) : ['modified'],
+		body: `${originalPost.body} modified`,
+	};
+
+	const res = await request(app)
+		.put(`/api/v1/blog-posts/${originalPost.id}`)
+		.send({
+			token,
+			title: post.title,
+			tags: post.tags,
+			body: post.body,
 		});
 
 	// Retrieve the newly modified blog post.
@@ -969,7 +1157,7 @@ test('PUT /api/v1/blog-posts/:id - fail, no token', async (t) => {
 	t.is(res.body.data.role, undefined);
 });
 
-test('PUT /api/v1/blog-posts/:id - fail, not admin', async (t) => {
+test('PUT /api/v1/blog-posts/:id - fail, user', async (t) => {
 	t.plan(4);
 
 	const user = await createUser(app, roles.USER);
@@ -990,15 +1178,53 @@ test('PUT /api/v1/blog-posts/:id - fail, not admin', async (t) => {
 	t.not(res.body.data.role, undefined);
 });
 
+test('PUT /api/v1/blog-posts/:id - fail, contributor not own', async (t) => {
+	t.plan(4);
+
+	const user = await createUser(app, roles.CONTRIBUTOR);
+	const originalPost = await createBlogPost(app);
+
+	const token = await getToken(app, user.name, user.password);
+
+	const res = await request(app)
+		.put(`/api/v1/blog-posts/${originalPost.id}`)
+		.send({
+			token,
+			title: 'Pizza',
+		});
+
+	t.is(res.status, 200);
+	t.is(res.body.status, 'fail');
+	t.is(res.body.data.token, undefined);
+	t.not(res.body.data.role, undefined);
+});
+
 // DELETE /api/v1/blog-posts/:id
 
-test('DELETE /api/v1/blog-posts/:id - success', async (t) => {
+test('DELETE /api/v1/blog-posts/:id - success, admin', async (t) => {
 	t.plan(3);
 
 	// Get an admin token.
 	const token = await getAdminToken(app);
 
 	const blogPost = await createBlogPost(app);
+
+	const res = await request(app)
+		.delete(`/api/v1/blog-posts/${blogPost.id}`)
+		.send({ token });
+
+	t.is(res.status, 200);
+	t.is(res.body.status, 'success');
+	t.not(res.body.data.blogPost, undefined);
+});
+
+test('DELETE /api/v1/blog-posts/:id - success, contributor', async (t) => {
+	t.plan(3);
+
+	const user = await createUser(app, roles.CONTRIBUTOR);
+	const token = await getToken(app, user.name, user.password);
+
+	const blogPost = await createBlogPost(app, token);
 
 	const res = await request(app)
 		.delete(`/api/v1/blog-posts/${blogPost.id}`)
@@ -1053,10 +1279,28 @@ test('DELETE /api/v1/blog-posts/:id - fail, no token', async (t) => {
 	t.not(res.body.data.token, undefined);
 });
 
-test('DELETE /api/v1/blog-posts/:id - fail, not admin', async (t) => {
+test('DELETE /api/v1/blog-posts/:id - fail, user', async (t) => {
 	t.plan(4);
 
 	const user = await createUser(app, roles.USER);
+	const blogPost = await createBlogPost(app);
+
+	const token = await getToken(app, user.name, user.password);
+
+	const res = await request(app)
+		.delete(`/api/v1/blog-posts/${blogPost.id}`)
+		.send({ token });
+
+	t.is(res.status, 200);
+	t.is(res.body.status, 'fail');
+	t.is(res.body.data.token, undefined);
+	t.not(res.body.data.role, undefined);
+});
+
+test('DELETE /api/v1/blog-posts/:id - fail, contributor not own', async (t) => {
+	t.plan(4);
+
+	const user = await createUser(app, roles.CONTRIBUTOR);
 	const blogPost = await createBlogPost(app);
 
 	const token = await getToken(app, user.name, user.password);

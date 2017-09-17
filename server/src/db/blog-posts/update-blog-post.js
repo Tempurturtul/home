@@ -1,3 +1,4 @@
+const getBlogPost = require('./get-blog-post');
 const db = require('../db');
 const roles = require('../../lib/user-roles');
 
@@ -18,8 +19,8 @@ const roles = require('../../lib/user-roles');
 async function updateBlogPost(id, updates, requestingUser) {
 	const result = {};
 
-	// Fail if requesting user isn't an admin.
-	if (requestingUser.role !== roles.ADMIN) {
+	// Fail if requesting user isn't an admin or contributor.
+	if (requestingUser.role !== roles.ADMIN && requestingUser.role !== roles.CONTRIBUTOR) {
 		result.status = 'fail';
 		result.data = { role: 'You do not have access to this resource.' };
 
@@ -30,6 +31,27 @@ async function updateBlogPost(id, updates, requestingUser) {
 	if (!Number.isSafeInteger(id)) {
 		result.status = 'fail';
 		result.data = { id: 'ID must be an integer.' };
+
+		return result;
+	}
+
+	// Attempt to get original blog post.
+	const originalResult = await getBlogPost(id);
+
+	// Fail if unable to get original.
+	if (originalResult.status !== 'success') {
+		result.status = 'fail';
+		result.data = originalResult.data;
+
+		return result;
+	}
+
+	// Fail if requesting user is a contributor and not the author.
+	if (requestingUser.role === roles.CONTRIBUTOR &&
+		requestingUser.name !== originalResult.data.blogPost.author
+	) {
+		result.status = 'fail';
+		result.data = { role: 'You do not have access to this resource.' };
 
 		return result;
 	}
@@ -69,16 +91,9 @@ async function updateBlogPost(id, updates, requestingUser) {
 
 	queryStr += ' WHERE id = $1 RETURNING *';
 
-	return db.oneOrNone(queryStr, values)
+	// No need to check if blog post exists since we've already succeeeded in retrieving the original.
+	return db.one(queryStr, values)
 		.then((blogPost) => {
-			// Fail if no blog post found.
-			if (!blogPost) {
-				result.status = 'fail';
-				result.data = { id: 'No blog post with that ID exists.' };
-
-				return result;
-			}
-
 			result.status = 'success';
 			result.data = { blogPost };
 

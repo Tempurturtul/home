@@ -2,9 +2,7 @@ import crypto from 'crypto';
 import request from 'supertest';
 import getAdminToken from './get-admin-token';
 
-async function createBlogPost(app) {
-	const token = await getAdminToken(app);
-
+async function createBlogPost(app, token) {
 	// Blog post with random title, tags, and body.
 	const title = crypto.randomBytes(16).toString('hex');
 	const tags = crypto.randomBytes(128).toString('hex').split('9');
@@ -12,7 +10,12 @@ async function createBlogPost(app) {
 
 	const res = await request(app)
 		.post('/api/v1/blog-posts')
-		.send({ token, title, tags, body });
+		.send({
+			token: token || await getAdminToken(app),
+			title,
+			tags,
+			body,
+		});
 
 	if (res.body.status !== 'success') {
 		console.error(res.body.data);

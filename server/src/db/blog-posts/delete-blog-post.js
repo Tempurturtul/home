@@ -14,8 +14,8 @@ const roles = require('../../lib/user-roles');
 async function deleteBlogPost(id, requestingUser) {
 	const result = {};
 
-	// Fail if requesting user isn't an admin.
-	if (requestingUser.role !== roles.ADMIN) {
+	// Fail if requesting user isn't an admin or contributor.
+	if (requestingUser.role !== roles.ADMIN && requestingUser.role !== roles.CONTRIBUTOR) {
 		result.status = 'fail';
 		result.data = { role: 'You do not have access to this resource.' };
 
@@ -36,6 +36,14 @@ async function deleteBlogPost(id, requestingUser) {
 			if (!blogPost) {
 				result.status = 'fail';
 				result.data = { id: 'No blog post with that ID exists.' };
+
+				return result;
+			}
+
+			// Fail if requesting user is a contributor and not the author.
+			if (requestingUser.role === roles.CONTRIBUTOR && requestingUser.name !== blogPost.author) {
+				result.status = 'fail';
+				result.data = { role: 'You do not have access to this resource.' };
 
 				return result;
 			}

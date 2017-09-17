@@ -16,8 +16,8 @@ const roles = require('../../lib/user-roles');
 async function createBlogPost(title, tags, body, requestingUser) {
 	const result = {};
 
-	// Fail if requesting user isn't an admin.
-	if (requestingUser.role !== roles.ADMIN) {
+	// Fail if requesting user isn't an admin or contributor.
+	if (requestingUser.role !== roles.ADMIN && requestingUser.role !== roles.CONTRIBUTOR) {
 		result.status = 'fail';
 		result.data = { role: 'You do not have access to this resource.' };
 

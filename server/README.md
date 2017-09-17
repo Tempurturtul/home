@@ -9,8 +9,8 @@ Server for my home on the web.
 | `/authenticate` 		| Create a new authorization token. 	| - 									| - 								| - 								|
 | `/users` 				| Create a new user. 					| Get a list of all users. *(admin)* 	| - 								| - 								|
 | `/users/:name` 		| - 									| Get a user. *(admin, self)* 			| Update a user. *(admin, self)* 	| Delete a user. *(admin, self)* 	|
-| `/blog-posts` 		| Create a new blog post. *(admin)* 	| Get a list of all blog posts. 		| - 								| - 								|
-| `/blog-posts/:id` 	| - 									| Get a blog post. 						| Update a blog post. *(admin)* 	| Delete a blog post. *(admin)* 	|
+| `/blog-posts` 		| Create a new blog post. *(admin, contributor)* 	| Get a list of all blog posts. 		| - 								| - 								|
+| `/blog-posts/:id` 	| - 									| Get a blog post. 						| Update a blog post. *(admin, contributor [own])* 	| Delete a blog post. *(admin, contributor [own])* 	|
 
 ## Quickstart (Ubuntu)
 
