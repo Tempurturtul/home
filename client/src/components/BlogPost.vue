@@ -1,11 +1,29 @@
 <template>
   <div class="blog-post">
-    <h1>~/blog/{{id}}$ print-post</h1>
-    <div v-if="post" v-html="post.body"></div>
+    <h1>~/blog/{{ id }}$ print-post</h1>
+    <div class="loading" v-if="loading">
+      Loading...
+    </div>
+
+    <div class="error" v-if="error">
+      {{ error }}
+    </div>
+
+    <div class="content" v-if="post">
+      <h1>{{ post.title }}</h1>
+      <!-- TODO ID -->
+      <!-- TODO Author -->
+      <!-- TODO Created -->
+      <!-- TODO Modified -->
+      <!-- TODO Tags -->
+      <!-- TODO Body -->
+    </div>
   </div>
 </template>
 
 <script>
+import axios from 'axios';
+
 export default {
   name: 'blog-post',
   props: [
@@ -13,41 +31,34 @@ export default {
   ],
   data() {
     return {
+      loading: false,
+      error: null,
       post: null,
     };
   },
-  mounted() {
-    this.fetchPost();
+  created() {
+    // Fetch data when view is created.
+    this.fetchData();
+  },
+  watch: {
+    // Fetch data again when the route changes.
+    $route: 'fetchData',
   },
   methods: {
-    fetchPost() {
-      const posts = [
-        {
-          title: 'Reviewing FEND',
-          subtitle: 'Udacity\'s Front-End Web Developer Nanodegree',
-          author: 'Matthew Feidt',
-          created: '2016-07-24',
-          modified: '',
-          tags: [
-            'review',
-            'education',
-          ],
-          body: '<p>This review was originally posted on Reddit\'s /r/learnprogramming and /r/webdev subreddits. ...</p>',
-        },
-        {
-          title: 'Hello World',
-          subtitle: '',
-          author: 'Matthew Feidt',
-          created: '2016-07-19',
-          modified: '2017-05-07',
-          tags: [
-            'personal',
-          ],
-          body: '<p>My name\'s Matt. ...</p>',
-        },
-      ];
+    fetchData() {
+      this.error = null;
+      this.post = null;
+      this.loading = true;
 
-      this.post = posts.filter(p => p.title.toLowerCase().split(' ').join('-') === this.id)[0];
+      axios.get(`/api/v1/blog-post/${this.id}`)
+        .then((res) => {
+          this.loading = false;
+          this.post = res.data;
+        })
+        .catch((e) => {
+          this.loading = false;
+          this.error = e.toString();
+        });
     },
   },
 };
