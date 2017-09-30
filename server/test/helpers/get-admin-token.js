@@ -6,7 +6,7 @@ let admin;
 
 async function getAdminToken(app) {
 	if (!admin) {
-		admin = await createUser(app, roles.ADMIN);
+		admin = await createUser(roles.ADMIN);
 	}
 
 	const res = await request(app)

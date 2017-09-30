@@ -31,7 +31,7 @@ test.after.always(async () => {
 test('POST /api/v1/authenticate - success', async (t) => {
 	t.plan(3);
 
-	const user = await createUser(app, roles.USER);
+	const user = await createUser(roles.USER);
 
 	const res = await request(app)
 		.post('/api/v1/authenticate')
@@ -45,7 +45,7 @@ test('POST /api/v1/authenticate - success', async (t) => {
 test('POST /api/v1/authenticate - fail, wrong password', async (t) => {
 	t.plan(4);
 
-	const user = await createUser(app, roles.USER);
+	const user = await createUser(roles.USER);
 
 	const res = await request(app)
 		.post('/api/v1/authenticate')
@@ -60,7 +60,7 @@ test('POST /api/v1/authenticate - fail, wrong password', async (t) => {
 test('POST /api/v1/authenticate - fail, no password', async (t) => {
 	t.plan(4);
 
-	const user = await createUser(app, roles.USER);
+	const user = await createUser(roles.USER);
 
 	const res = await request(app)
 		.post('/api/v1/authenticate')
@@ -75,7 +75,7 @@ test('POST /api/v1/authenticate - fail, no password', async (t) => {
 test('POST /api/v1/authenticate - fail, wrong name', async (t) => {
 	t.plan(4);
 
-	const user = await createUser(app, roles.USER);
+	const user = await createUser(roles.USER);
 
 	const res = await request(app)
 		.post('/api/v1/authenticate')
@@ -90,7 +90,7 @@ test('POST /api/v1/authenticate - fail, wrong name', async (t) => {
 test('POST /api/v1/authenticate - fail, no name', async (t) => {
 	t.plan(4);
 
-	const user = await createUser(app, roles.USER);
+	const user = await createUser(roles.USER);
 
 	const res = await request(app)
 		.post('/api/v1/authenticate')
@@ -124,7 +124,7 @@ test('POST /api/v1/users - success', async (t) => {
 test('POST /api/v1/users - fail, name exists', async (t) => {
 	t.plan(4);
 
-	const user = await createUser(app, roles.USER);
+	const user = await createUser(roles.USER);
 
 	const res = await request(app)
 		.post('/api/v1/users')
@@ -275,7 +275,7 @@ test('GET /api/v1/users - fail, no token', async (t) => {
 test('GET /api/v1/users - fail, user', async (t) => {
 	t.plan(4);
 
-	const user = await createUser(app, roles.USER);
+	const user = await createUser(roles.USER);
 
 	const token = await getToken(app, user.name, user.password);
 
@@ -292,7 +292,7 @@ test('GET /api/v1/users - fail, user', async (t) => {
 test('GET /api/v1/users - fail, contributor', async (t) => {
 	t.plan(4);
 
-	const user = await createUser(app, roles.CONTRIBUTOR);
+	const user = await createUser(roles.CONTRIBUTOR);
 
 	const token = await getToken(app, user.name, user.password);
 
@@ -313,7 +313,7 @@ test('GET /api/v1/users/:name - success, admin', async (t) => {
 
 	const token = await getAdminToken(app);
 
-	const user = await createUser(app, roles.USER);
+	const user = await createUser(roles.USER);
 
 	const res = await request(app)
 		.get(`/api/v1/users/${user.name}`)
@@ -328,7 +328,7 @@ test('GET /api/v1/users/:name - success, admin', async (t) => {
 test('GET /api/v1/users/:name - success, self', async (t) => {
 	t.plan(4);
 
-	const user = await createUser(app, roles.USER);
+	const user = await createUser(roles.USER);
 
 	const token = await getToken(app, user.name, user.password);
 
@@ -359,7 +359,7 @@ test('GET /api/v1/users/:name - fail, wrong name', async (t) => {
 test('GET /api/v1/users/:name - fail, no token', async (t) => {
 	t.plan(4);
 
-	const user = await createUser(app, roles.USER);
+	const user = await createUser(roles.USER);
 
 	const res = await request(app)
 		.get(`/api/v1/users/${user.name}`);
@@ -373,11 +373,11 @@ test('GET /api/v1/users/:name - fail, no token', async (t) => {
 test('GET /api/v1/users/:name - fail, user not self', async (t) => {
 	t.plan(4);
 
-	const user = await createUser(app, roles.USER);
+	const user = await createUser(roles.USER);
 
 	const token = await getToken(app, user.name, user.password);
 
-	const otherUser = await createUser(app, roles.USER);
+	const otherUser = await createUser(roles.USER);
 
 	const res = await request(app)
 		.get(`/api/v1/users/${otherUser.name}`)
@@ -392,11 +392,11 @@ test('GET /api/v1/users/:name - fail, user not self', async (t) => {
 test('GET /api/v1/users/:name - fail, contributor not self', async (t) => {
 	t.plan(4);
 
-	const user = await createUser(app, roles.CONTRIBUTOR);
+	const user = await createUser(roles.CONTRIBUTOR);
 
 	const token = await getToken(app, user.name, user.password);
 
-	const otherUser = await createUser(app, roles.USER);
+	const otherUser = await createUser(roles.USER);
 
 	const res = await request(app)
 		.get(`/api/v1/users/${otherUser.name}`)
@@ -417,7 +417,7 @@ test('PUT /api/v1/users/:name - success, full admin', async (t) => {
 	const token = await getAdminToken(app);
 
 	// Get a user to modify.
-	const originalUser = await createUser(app, roles.USER);
+	const originalUser = await createUser(roles.USER);
 
 	// Define new user data.
 	const modifiedUser = {
@@ -458,7 +458,7 @@ test('PUT /api/v1/users/:name - success, full self', async (t) => {
 	t.plan(4);
 
 	// Get a user to modify.
-	const originalUser = await createUser(app, roles.USER);
+	const originalUser = await createUser(roles.USER);
 
 	// Get the user's token.
 	const token = await getToken(app, originalUser.name, originalUser.password);
@@ -505,7 +505,7 @@ test('PUT /api/v1/users/:name - success, no changes', async (t) => {
 	const token = await getAdminToken(app);
 
 	// Get a user to modify.
-	const originalUser = await createUser(app, roles.USER);
+	const originalUser = await createUser(roles.USER);
 
 	const res = await request(app)
 		.put(`/api/v1/users/${originalUser.name}`)
@@ -556,7 +556,7 @@ test('PUT /api/v1/users/:name - fail, no token', async (t) => {
 	t.plan(4);
 
 	// Get a user to modify.
-	const originalUser = await createUser(app, roles.USER);
+	const originalUser = await createUser(roles.USER);
 
 	const res = await request(app)
 		.put(`/api/v1/users/${originalUser.name}`)
@@ -574,13 +574,13 @@ test('PUT /api/v1/users/:name - fail, no token', async (t) => {
 test('PUT /api/v1/users/:name - fail, user not self', async (t) => {
 	t.plan(4);
 
-	const user = await createUser(app, roles.USER);
+	const user = await createUser(roles.USER);
 
 	// Get a non-admin token.
 	const token = await getToken(app, user.name, user.password);
 
 	// Get a user to modify.
-	const originalUser = await createUser(app, roles.USER);
+	const originalUser = await createUser(roles.USER);
 
 	const res = await request(app)
 		.put(`/api/v1/users/${originalUser.name}`)
@@ -599,13 +599,13 @@ test('PUT /api/v1/users/:name - fail, user not self', async (t) => {
 test('PUT /api/v1/users/:name - fail, contributor not self', async (t) => {
 	t.plan(4);
 
-	const user = await createUser(app, roles.CONTRIBUTOR);
+	const user = await createUser(roles.CONTRIBUTOR);
 
 	// Get a non-admin token.
 	const token = await getToken(app, user.name, user.password);
 
 	// Get a user to modify.
-	const originalUser = await createUser(app, roles.USER);
+	const originalUser = await createUser(roles.USER);
 
 	const res = await request(app)
 		.put(`/api/v1/users/${originalUser.name}`)
@@ -625,7 +625,7 @@ test('PUT /api/v1/users/:name - fail, user role change', async (t) => {
 	t.plan(4);
 
 	// Get a user to modify.
-	const originalUser = await createUser(app, roles.USER);
+	const originalUser = await createUser(roles.USER);
 
 	// Get the user's token.
 	const token = await getToken(app, originalUser.name, originalUser.password);
@@ -656,7 +656,7 @@ test('PUT /api/v1/users/:name - fail, contributor role change', async (t) => {
 	t.plan(4);
 
 	// Get a user to modify.
-	const originalUser = await createUser(app, roles.CONTRIBUTOR);
+	const originalUser = await createUser(roles.CONTRIBUTOR);
 
 	// Get the user's token.
 	const token = await getToken(app, originalUser.name, originalUser.password);
@@ -691,7 +691,7 @@ test('DELETE /api/v1/users/:name - success, admin', async (t) => {
 	// Get an admin token.
 	const token = await getAdminToken(app);
 
-	const user = await createUser(app, roles.USER);
+	const user = await createUser(roles.USER);
 
 	const res = await request(app)
 		.delete(`/api/v1/users/${user.name}`)
@@ -706,7 +706,7 @@ test('DELETE /api/v1/users/:name - success, self', async (t) => {
 	t.plan(3);
 
 	// Get a user to modify.
-	const user = await createUser(app, roles.USER);
+	const user = await createUser(roles.USER);
 
 	// Get the user's token.
 	const token = await getToken(app, user.name, user.password);
@@ -738,7 +738,7 @@ test('DELETE /api/v1/users/:name - fail, wrong name', async (t) => {
 test('DELETE /api/v1/users/:name - fail, no token', async (t) => {
 	t.plan(3);
 
-	const user = await createUser(app, roles.USER);
+	const user = await createUser(roles.USER);
 
 	const res = await request(app)
 		.delete(`/api/v1/users/${user.name}`)
@@ -752,13 +752,13 @@ test('DELETE /api/v1/users/:name - fail, no token', async (t) => {
 test('DELETE /api/v1/users/:name - fail, user not self', async (t) => {
 	t.plan(4);
 
-	const user = await createUser(app, roles.USER);
+	const user = await createUser(roles.USER);
 
 	// Get a non-admin token.
 	const token = await getToken(app, user.name, user.password);
 
 	// Get a user to modify.
-	const originalUser = await createUser(app, roles.USER);
+	const originalUser = await createUser(roles.USER);
 
 	const res = await request(app)
 		.delete(`/api/v1/users/${originalUser.name}`)
@@ -773,13 +773,13 @@ test('DELETE /api/v1/users/:name - fail, user not self', async (t) => {
 test('DELETE /api/v1/users/:name - fail, contributor not self', async (t) => {
 	t.plan(4);
 
-	const user = await createUser(app, roles.CONTRIBUTOR);
+	const user = await createUser(roles.CONTRIBUTOR);
 
 	// Get a non-admin token.
 	const token = await getToken(app, user.name, user.password);
 
 	// Get a user to modify.
-	const originalUser = await createUser(app, roles.USER);
+	const originalUser = await createUser(roles.USER);
 
 	const res = await request(app)
 		.delete(`/api/v1/users/${originalUser.name}`)
@@ -862,7 +862,7 @@ test('POST /api/v1/blog-posts - success, admin minimum', async (t) => {
 test('POST /api/v1/blog-posts - success, contributor', async (t) => {
 	t.plan(4);
 
-	const user = await createUser(app, roles.CONTRIBUTOR);
+	const user = await createUser(roles.CONTRIBUTOR);
 
 	const token = await getToken(app, user.name, user.password);
 
@@ -910,7 +910,7 @@ test('POST /api/v1/blog-posts - fail, no token', async (t) => {
 test('POST /api/v1/blog-posts - fail, user', async (t) => {
 	t.plan(4);
 
-	const user = await createUser(app, roles.USER);
+	const user = await createUser(roles.USER);
 
 	const token = await getToken(app, user.name, user.password);
 
@@ -1063,7 +1063,7 @@ test('PUT /api/v1/blog-posts/:id - success, admin no changes', async (t) => {
 test('PUT /api/v1/blog-posts/:id - success, contributor', async (t) => {
 	t.plan(4);
 
-	const user = await createUser(app, roles.CONTRIBUTOR);
+	const user = await createUser(roles.CONTRIBUTOR);
 
 	const token = await getToken(app, user.name, user.password);
 
@@ -1160,7 +1160,7 @@ test('PUT /api/v1/blog-posts/:id - fail, no token', async (t) => {
 test('PUT /api/v1/blog-posts/:id - fail, user', async (t) => {
 	t.plan(4);
 
-	const user = await createUser(app, roles.USER);
+	const user = await createUser(roles.USER);
 	const originalPost = await createBlogPost(app);
 
 	const token = await getToken(app, user.name, user.password);
@@ -1181,7 +1181,7 @@ test('PUT /api/v1/blog-posts/:id - fail, user', async (t) => {
 test('PUT /api/v1/blog-posts/:id - fail, contributor not own', async (t) => {
 	t.plan(4);
 
-	const user = await createUser(app, roles.CONTRIBUTOR);
+	const user = await createUser(roles.CONTRIBUTOR);
 	const originalPost = await createBlogPost(app);
 
 	const token = await getToken(app, user.name, user.password);
@@ -1221,7 +1221,7 @@ test('DELETE /api/v1/blog-posts/:id - success, admin', async (t) => {
 test('DELETE /api/v1/blog-posts/:id - success, contributor', async (t) => {
 	t.plan(3);
 
-	const user = await createUser(app, roles.CONTRIBUTOR);
+	const user = await createUser(roles.CONTRIBUTOR);
 	const token = await getToken(app, user.name, user.password);
 
 	const blogPost = await createBlogPost(app, token);
@@ -1282,7 +1282,7 @@ test('DELETE /api/v1/blog-posts/:id - fail, no token', async (t) => {
 test('DELETE /api/v1/blog-posts/:id - fail, user', async (t) => {
 	t.plan(4);
 
-	const user = await createUser(app, roles.USER);
+	const user = await createUser(roles.USER);
 	const blogPost = await createBlogPost(app);
 
 	const token = await getToken(app, user.name, user.password);
@@ -1300,7 +1300,7 @@ test('DELETE /api/v1/blog-posts/:id - fail, user', async (t) => {
 test('DELETE /api/v1/blog-posts/:id - fail, contributor not own', async (t) => {
 	t.plan(4);
 
-	const user = await createUser(app, roles.CONTRIBUTOR);
+	const user = await createUser(roles.CONTRIBUTOR);
 	const blogPost = await createBlogPost(app);
 
 	const token = await getToken(app, user.name, user.password);

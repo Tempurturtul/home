@@ -2,7 +2,7 @@ import crypto from 'crypto';
 import db from '../../src/db/db';
 import pw from '../../src/lib/password';
 
-async function createUser(app, role) {
+async function createUser(role) {
 	// User with random name and password.
 	const user = {
 		name: crypto.randomBytes(16).toString('hex'),
