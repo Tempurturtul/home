@@ -50,7 +50,7 @@ export default {
       this.post = null;
       this.loading = true;
 
-      axios.get(`/api/v1/blog-post/${this.id}`)
+      axios.get(`/api/v1/blog-posts/${this.id}`)
         .then((res) => {
           this.loading = false;
           this.post = res.data;
