@@ -1,0 +1,26 @@
+DROP DATABASE IF EXISTS home;
+CREATE DATABASE home;
+
+\c home;
+
+CREATE TYPE password AS (
+	hash VARCHAR,
+	salt VARCHAR,
+	iterations INTEGER
+);
+
+CREATE TABLE users (
+	name VARCHAR PRIMARY KEY,
+	password PASSWORD NOT NULL,
+	role VARCHAR NOT NULL
+);
+
+CREATE TABLE blogPosts (
+	id SERIAL PRIMARY KEY,
+	title VARCHAR NOT NULL,
+	author VARCHAR NOT NULL,
+	created TIMESTAMP WITH TIME ZONE NOT NULL,
+	modified TIMESTAMP WITH TIME ZONE,
+	tags VARCHAR[],
+	body VARCHAR
+);
