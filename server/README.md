@@ -23,7 +23,7 @@ Server for my home on the web.
 sudo apt install git
 
 # Install Node.js.
-curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -
+curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
 sudo apt-get install -y nodejs
 
 # Update npm.
