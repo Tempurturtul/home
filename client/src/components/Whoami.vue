@@ -2,7 +2,7 @@
   <div class="whoami">
     <h1>~$ whoami</h1>
     <h2>matthew-feidt</h2>
-    <p>Software engineer enrolled at Oregon State University with an expected graduation date of <time datetime="2018-06-15">June 2018</time>. Seeking first role in the industry.</p>
+    <p>Software engineer at Frazer Computing and current student at Oregon State University.</p>
     <h3>Good at:</h3>
     <ul>
       <li>c</li>
@@ -11,9 +11,9 @@
     </ul>
     <h3>Interested in:</h3>
     <ul>
-      <li>go</li>
-      <li>haskell</li>
       <li>software design</li>
+      <li>functional programming</li>
+      <li>information security (privacy)</li>
     </ul>
   </div>
 </template>
