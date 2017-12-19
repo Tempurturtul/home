@@ -28,23 +28,21 @@ async function createBlogPost(title, tags, body, requestingUser) {
 	const created = new Date().toISOString();
 
 	// Build query string and values.
-	let queryStr = 'INSERT INTO blogPosts (title, author, created';
+	let queryStr = 'INSERT INTO blog_posts (title, author, created';
 	const values = [title, author, created];
-
-	if (tags.length) {
-		queryStr += ', tags';
-		values.push(tags);
-	}
 
 	if (body.length) {
 		queryStr += ', body';
 		values.push(body);
 	}
 
-	queryStr += `) VALUES (${values.map((v, i) => `$${i + 1}`).join(', ')}) RETURNING *`;
+	queryStr += `) VALUES (${values.map((v, i) => `$${i + 1}`).join(', ')}) RETURNING id, title, created, modified, author, body`;
 
 	return db.one(queryStr, values)
 		.then((blogPost) => {
+			// Create tags if needed, and blog post - tag relationship.
+			// TODO
+
 			result.status = 'success';
 			result.data = { blogPost };
 

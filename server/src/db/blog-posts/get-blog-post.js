@@ -18,7 +18,7 @@ async function getBlogPost(id) {
 		return result;
 	}
 
-	return db.oneOrNone('SELECT * FROM blogPosts WHERE id = $1', [id])
+	return db.oneOrNone('SELECT id, title, created, modified, author, body FROM blog_posts WHERE id = $1', [id])
 		.then((blogPost) => {
 			// Fail if blog post wasn't found.
 			if (!blogPost) {

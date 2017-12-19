@@ -30,7 +30,8 @@ async function deleteBlogPost(id, requestingUser) {
 		return result;
 	}
 
-	return db.oneOrNone('DELETE FROM blogPosts WHERE id = $1 RETURNING *', [id])
+	// TODO Explicit return.
+	return db.oneOrNone('DELETE FROM blog_posts WHERE id = $1 RETURNING *', [id])
 		.then((blogPost) => {
 			// Fail if blog post wasn't found.
 			if (!blogPost) {
