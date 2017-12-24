@@ -9,7 +9,7 @@ const db = require('../db');
 async function getBlogPosts() {
 	const result = {};
 
-	return db.any('SELECT * FROM blogPosts ORDER BY created')
+	return db.any('SELECT id, title, created, modified, author, body FROM blog_posts ORDER BY created')
 		.then((blogPosts) => {
 			result.status = 'success';
 			result.data = { blogPosts };

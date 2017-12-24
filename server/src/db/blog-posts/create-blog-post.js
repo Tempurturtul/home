@@ -4,7 +4,6 @@ const roles = require('../../lib/user-roles');
 /**
  * Attempts to create a blog post.
  * @param {string} title - The blog post title.
- * @param {string[]} tags - The blog post tags.
  * @param {string} body - The blog post body.
  * @param {object} requestingUser - The requesting user.
  * @param {string} requestingUser.name - The requesting user's name.
@@ -13,7 +12,7 @@ const roles = require('../../lib/user-roles');
  * successful, the blog post will be returned in the result's `data.blogPost`
  * property.
  */
-async function createBlogPost(title, tags, body, requestingUser) {
+async function createBlogPost(title, body, requestingUser) {
 	const result = {};
 
 	// Fail if requesting user isn't an admin or contributor.
@@ -40,9 +39,6 @@ async function createBlogPost(title, tags, body, requestingUser) {
 
 	return db.one(queryStr, values)
 		.then((blogPost) => {
-			// Create tags if needed, and blog post - tag relationship.
-			// TODO
-
 			result.status = 'success';
 			result.data = { blogPost };
 

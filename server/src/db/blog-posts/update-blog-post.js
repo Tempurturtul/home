@@ -7,7 +7,6 @@ const roles = require('../../lib/user-roles');
  * @param {number} id - The ID of the target blog post.
  * @param {object} updates - The updates for the target blog post.
  * @param {string} [updates.title] - The new title.
- * @param {string} [updates.tags] - The new tags.
  * @param {string} [updates.body] - The new body.
  * @param {object} requestingUser - The requesting user.
  * @param {string} requestingUser.name - The requesting user's name.
@@ -59,7 +58,7 @@ async function updateBlogPost(id, updates, requestingUser) {
 	const modified = new Date().toISOString();
 
 	// Build query string and values.
-	let queryStr = 'UPDATE blogPosts SET modified = $2';
+	let queryStr = 'UPDATE blog_posts SET modified = $2';
 	const values = [id, modified];
 
 	if (updates.title) {
@@ -67,20 +66,8 @@ async function updateBlogPost(id, updates, requestingUser) {
 		values.push(updates.title);
 	}
 
-	if (updates.tags) {
-		if (updates.title) {
-			queryStr += ', tags = $4';
-		} else {
-			queryStr += ', tags = $3';
-		}
-
-		values.push(updates.tags);
-	}
-
 	if (updates.body) {
-		if (updates.title && updates.tags) {
-			queryStr += ', body = $5';
-		} else if (updates.title || updates.tags) {
+		if (updates.title) {
 			queryStr += ', body = $4';
 		} else {
 			queryStr += ', body = $3';
@@ -89,6 +76,7 @@ async function updateBlogPost(id, updates, requestingUser) {
 		values.push(updates.body);
 	}
 
+	// TODO Explicit return.
 	queryStr += ' WHERE id = $1 RETURNING *';
 
 	// No need to check if blog post exists since we've already succeeeded in retrieving the original.
